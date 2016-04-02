@@ -1,9 +1,41 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>AZERTYU</title>
+		<title>Market Place Data Harvester</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+		<script src="https://bitwiseshiftleft.github.io/sjcl/sjcl.js"></script>
 	</head>
 	<body>
-		<h1>Toto</h1>
+		<div id="pageContent">
+			<h1>Market Place Data Harvester</h1>
+			<h5>Login</h5>
+			<form>
+				<input id="login" type="text" placeholder="Login" /><br>
+				<input id="password" type="password" placeholder="Password" /><br>
+				<input id="sign_in_button" type="submit" value="Sign in"/>
+			</form>
+		</div>
+		
+		<script>
+			$(function(){
+				$("#sign_in_button").click(function(evt){
+					var login = $("#login").val();
+					var password = $("#password").val();
+					$.post("/login", {username: login}, function(data){
+						var sessionsalt = data.sessionsalt;
+						var accountsalt = data.accountsalt;
+						
+						var pwdAndSalt = sjcl.hash.sha256.hash(password + accountsalt);
+						var sessionToken = sjcl.hash.sha256.hash(sjcl.codec.hex.fromBits(pwdAndSalt) + sessionsalt);
+						var authtoken = sjcl.codec.hex.fromBits(sessionToken);
+						
+						$.post("/login", {username: login, authtoken: authtoken}, function(data){
+							$("#pageContent").html(data);
+						});
+					});
+					return false;
+				});
+			});
+		</script>
 	</body>
 </html>
