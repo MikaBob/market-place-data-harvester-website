@@ -4,6 +4,7 @@
 		<title>Market Place Data Harvester</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 		<script src="https://bitwiseshiftleft.github.io/sjcl/sjcl.js"></script>
+		<script src="login.js" type="text/javascript"></script>
 	</head>
 	<body>
 		<div id="pageContent">
@@ -12,7 +13,8 @@
 			<form>
 				<input id="login" type="text" placeholder="Login" /><br>
 				<input id="password" type="password" placeholder="Password" /><br>
-				<input id="sign_in_button" type="submit" value="Sign in"/>
+				<input id="sign_in_button" type="submit" value="Sign in"/><br/>
+				<div id="errorDisplay"></div>
 			</form>
 		</div>
 		
@@ -21,18 +23,7 @@
 				$("#sign_in_button").click(function(evt){
 					var login = $("#login").val();
 					var password = $("#password").val();
-					$.post("/login", {username: login}, function(data){
-						var sessionsalt = data.sessionsalt;
-						var accountsalt = data.accountsalt;
-						
-						var pwdAndSalt = sjcl.hash.sha256.hash(password + accountsalt);
-						var sessionToken = sjcl.hash.sha256.hash(sjcl.codec.hex.fromBits(pwdAndSalt) + sessionsalt);
-						var authtoken = sjcl.codec.hex.fromBits(sessionToken);
-						
-						$.post("/login", {username: login, authtoken: authtoken}, function(data){
-							$("#pageContent").html(data);
-						});
-					});
+					loginRequest(login, password);
 					return false;
 				});
 			});

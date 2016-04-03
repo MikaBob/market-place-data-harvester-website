@@ -37,9 +37,22 @@ var log = function (filename, data) {
 
 app.listen(port);
 console.log("Server ready and listening on port " + port);
-app.get("*", function(req, res){
+
+app.get("/:file.js", function(req, res){
+	var file = req.params.file;
+	console.log("requested file: ", file);
+	var fileFullPath = "./public_html/script/" + file + ".js";
+	if(fs.existsSync(fileFullPath)){
+		res.writeHead(200, {"content-type": "text/javascript"});
+		fs.createReadStream(fileFullPath).pipe(res);
+	} else {
+		send404(res);
+	}
+});
+
+app.get("/", function(req, res){
 	if(req.url === "/"){
-		req.url = "/index.html";
+		req.url = "/public_html/index.html";
 	}
 	console.log("req.url = ", req.url);
 	if(fs.existsSync("." + req.url)){
@@ -61,7 +74,9 @@ app.post("/login", function(req, res){
 		async.parallel([
 			function(callback) {
 				userModel.findOne({login: username}, function(error, values){
-					if(!error){
+					if(error || ! values){
+						
+					} else {
 						userInformationsMap.set(values.login, values);
 					}
 					callback();
@@ -79,15 +94,15 @@ app.post("/login", function(req, res){
 						if(processedAuthToken == authToken){ // Login successful
 							console.log("User authenticated :", user.login);
 						log("log/userLogin.log", "[", new Date().toLocaleString() + "] User authenticated : " + user.login);
-							res.writeHead(200, {"content-type": "text/html"});
-							res.write("<h1>Login successful</h1><h5>Welcome " + user.login + "</h5>");
+							res.writeHead(200, {"content-type": "application/json"});
+							res.write(JSON.stringify({success: true, username: user.login}));
 							res.end();
 						} else { // Login failed
-							sendError(res, 400, "Authentication failed", "Did you type your password correctly ?");
+							sendError(res, 400, "Incorrect password for user '" + username + "'", 'password');
 						}
 					} else {
 						console.log("Unknown session");
-						sendError(res, 400, "Unknown session");
+						sendError(res, 400, "Your session has expired, please login again");
 					}
 				} else { // First request with only username
 					var sessionsalt = crypto.randomBytes(16).toString('hex');
@@ -97,12 +112,11 @@ app.post("/login", function(req, res){
 					res.end();
 				}
 			} else { // Couldn't find user in db
-				sendError(res, 500, "Coundn't retrieve user salt from database");
+				sendError(res, 400, "Unknown username \"" + username + "\"", 'username');
 			}
 		});
 	} else { // No username
-		sendError(res, 400, "Unknown login", "To register, use POST /register {username: 'your_username' , password: 'your_password'}");
-		// console.log(crypto.randomBytes(16).toString('hex'));: });
+		sendError(res, 400, "Unknown login");
 	}
 });
 
@@ -110,13 +124,13 @@ var send404 = function(res){
 	sendError(res, 404, "404 / Page not found");
 };
 
-var sendError = function(res, httpErrorCode, errorString, errorDetails){
-	var additionnalInformation = '';
-	if (typeof errorDetails !== 'undefined') {
-		additionnalInformation = "<h5>" + errorDetails + "</h5>";
+var sendError = function(res, httpErrorCode, errorString, errorSource){
+	var error = {errmsg: errorString};
+	if (typeof errorSource !== 'undefined') {
+		error.errsrc = errorSource;
 	}
-	res.writeHead(httpErrorCode, {"content-type": "text/html"});
-	res.write("<h1 class='color:red;'>Error : " + errorString + "</h1>" + additionnalInformation);
+	res.writeHead(httpErrorCode, {"content-type": "application/json"});
+	res.write(JSON.stringify(error));
 	res.end();
 };
 
