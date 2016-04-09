@@ -24,7 +24,9 @@ var loginRequest = function(login, password){
 				url: "/login", 
 				data: {username: login, authtoken: authtoken}, 
 				success: function(data){
-					$("#pageContent").html("<h1>Login successful</h1><h5>Welcome " + data.username + " !</h5>");
+					savedAuthToken = data.authToken;
+					savedUsername = data.username;
+					$("#pageContent").prepend("<h5>Login successful, welcome " + data.username + " !</h5>");
 				}, 
 				error: function(error){
 					displayError(JSON.parse(error.responseText));
