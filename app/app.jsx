@@ -5,7 +5,7 @@ var backboneMixin = require('backbone-react-component');
 
 var reactApp = {};
 
-var items_collection = new Backbone.Collection();
+var itemsCollection = new Backbone.Collection();
 
 var ItemPriceApp = React.createClass({
     mixins: [backboneMixin],
@@ -83,7 +83,7 @@ var ItemSelectorMatchingItem = React.createClass({
 	}
 });
 
-ReactDOM.render(<ItemPriceApp collection={items_collection}/>, document.getElementById('itemPrices'));
+ReactDOM.render(<ItemPriceApp collection={itemsCollection}/>, document.getElementById('itemPrices'));
 */
 
 
@@ -95,38 +95,41 @@ import ReactBackbone from 'react.backbone';
 import {ItemSelector, SelectedItem} from './itemView.jsx';
 import {render} from 'react-dom';
 
-var items_collection = new Backbone.Collection({
-	matchingItems: function(string){
-		return this.models.filter(function(model){
-			return model.match(string);
-		});
-	}
-});
+var itemsCollection = new Backbone.Collection();
 
 class ItemPriceApp extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			items_collection: items_collection,
-			selected_item: {}
+			itemsCollection: itemsCollection,
+			selectedItem: ""
 		};
 		this.onReceiveItems = this.onReceiveItems.bind(this);
+		this.selectItem = this.selectItem.bind(this);
 		query("items", {}, this.onReceiveItems);
 	}
 	
 	onReceiveItems (data) {
-		var collection = this.state.items_collection;
-		collection.add(data);
-		this.setState({items_collection: data});
-		console.log(this.state.items_collection);
+		var collection = this.state.itemsCollection;
+		JSON.parse(data).forEach(function(item){
+			item.displayed = true;
+			collection.add(item);
+		});
+		this.setState({itemsCollection: collection});
+	}
+	
+	selectItem (item) {
+		this.setState({selectedItem: item});
+		this.forceUpdate();
 	}
 	
 	render () {
+		// console.log("render ItemPriceApp");
 		return (
 			<div>
 				<h1>MPDH</h1>
-				<ItemSelector items_collection={this.state.items_collection} />
-				<SelectedItem selected_item={this.state.selected_item} />
+				<ItemSelector itemsCollection={this.state.itemsCollection} selectItem={this.selectItem} />
+				<SelectedItem selectedItem={this.state.selectedItem} />
 			</div>
 		);
 	}

@@ -82,7 +82,7 @@
 	
 	var reactApp = {};
 	
-	var items_collection = new Backbone.Collection();
+	var itemsCollection = new Backbone.Collection();
 	
 	var ItemPriceApp = React.createClass({
 	    mixins: [backboneMixin],
@@ -160,18 +160,12 @@
 		}
 	});
 	
-	ReactDOM.render(<ItemPriceApp collection={items_collection}/>, document.getElementById('itemPrices'));
+	ReactDOM.render(<ItemPriceApp collection={itemsCollection}/>, document.getElementById('itemPrices'));
 	*/
 	
 	window.$ = window.jQuery = __webpack_require__(/*! jquery */ 36);
 	
-	var items_collection = new _backbone2.default.Collection({
-		matchingItems: function matchingItems(string) {
-			return this.models.filter(function (model) {
-				return model.match(string);
-			});
-		}
-	});
+	var itemsCollection = new _backbone2.default.Collection();
 	
 	var ItemPriceApp = function (_React$Component) {
 		_inherits(ItemPriceApp, _React$Component);
@@ -182,10 +176,11 @@
 			var _this = _possibleConstructorReturn(this, (ItemPriceApp.__proto__ || Object.getPrototypeOf(ItemPriceApp)).call(this, props));
 	
 			_this.state = {
-				items_collection: items_collection,
-				selected_item: {}
+				itemsCollection: itemsCollection,
+				selectedItem: ""
 			};
 			_this.onReceiveItems = _this.onReceiveItems.bind(_this);
+			_this.selectItem = _this.selectItem.bind(_this);
 			query("items", {}, _this.onReceiveItems);
 			return _this;
 		}
@@ -193,14 +188,23 @@
 		_createClass(ItemPriceApp, [{
 			key: 'onReceiveItems',
 			value: function onReceiveItems(data) {
-				var collection = this.state.items_collection;
-				collection.add(data);
-				this.setState({ items_collection: data });
-				console.log(this.state.items_collection);
+				var collection = this.state.itemsCollection;
+				JSON.parse(data).forEach(function (item) {
+					item.displayed = true;
+					collection.add(item);
+				});
+				this.setState({ itemsCollection: collection });
+			}
+		}, {
+			key: 'selectItem',
+			value: function selectItem(item) {
+				this.setState({ selectedItem: item });
+				this.forceUpdate();
 			}
 		}, {
 			key: 'render',
 			value: function render() {
+				// console.log("render ItemPriceApp");
 				return _react2.default.createElement(
 					'div',
 					null,
@@ -209,8 +213,8 @@
 						null,
 						'MPDH'
 					),
-					_react2.default.createElement(_itemView.ItemSelector, { items_collection: this.state.items_collection }),
-					_react2.default.createElement(_itemView.SelectedItem, { selected_item: this.state.selected_item })
+					_react2.default.createElement(_itemView.ItemSelector, { itemsCollection: this.state.itemsCollection, selectItem: this.selectItem }),
+					_react2.default.createElement(_itemView.SelectedItem, { selectedItem: this.state.selectedItem })
 				);
 			}
 		}]);
@@ -19800,15 +19804,19 @@
 	var ItemSelector = exports.ItemSelector = function (_React$Component) {
 		_inherits(ItemSelector, _React$Component);
 	
-		function ItemSelector() {
+		function ItemSelector(props) {
 			_classCallCheck(this, ItemSelector);
 	
-			return _possibleConstructorReturn(this, (ItemSelector.__proto__ || Object.getPrototypeOf(ItemSelector)).apply(this, arguments));
+			var _this = _possibleConstructorReturn(this, (ItemSelector.__proto__ || Object.getPrototypeOf(ItemSelector)).call(this, props));
+	
+			_this.filtersChangedCallback = _this.filtersChangedCallback.bind(_this);
+			return _this;
 		}
 	
 		_createClass(ItemSelector, [{
 			key: 'render',
 			value: function render() {
+				// console.log("render ItemSelector");
 				return _react2.default.createElement(
 					'div',
 					null,
@@ -19817,9 +19825,21 @@
 						null,
 						'Items'
 					),
-					_react2.default.createElement(ItemSelectorFilters, null),
-					_react2.default.createElement(ItemSelectorMatchingItemsList, null)
+					_react2.default.createElement(ItemSelectorFilters, { filtersChangedCallback: this.filtersChangedCallback }),
+					_react2.default.createElement(ItemSelectorMatchingItemsList, { itemsCollection: this.props.itemsCollection, selectItem: this.props.selectItem })
 				);
+			}
+		}, {
+			key: 'filtersChangedCallback',
+			value: function filtersChangedCallback(newText) {
+				this.props.itemsCollection.models.forEach(function (model) {
+					if (isdef(model.get("label")) && stringContains(model.get("label"), newText)) {
+						model.set({ displayed: true });
+					} else {
+						model.set({ displayed: false });
+					}
+				});
+				this.forceUpdate();
 			}
 		}]);
 	
@@ -19838,10 +19858,11 @@
 		_createClass(ItemSelectorFilters, [{
 			key: 'render',
 			value: function render() {
+				// console.log("render ItemSelectorFilters");
 				return _react2.default.createElement(
 					'div',
 					null,
-					_react2.default.createElement(ItemSelectorFiltersTextInput, null)
+					_react2.default.createElement(ItemSelectorFiltersTextInput, { filtersChangedCallback: this.props.filtersChangedCallback })
 				);
 			}
 		}]);
@@ -19861,12 +19882,15 @@
 		_createClass(ItemSelectorMatchingItemsList, [{
 			key: 'render',
 			value: function render() {
+				// console.log("render ItemSelectorMatchingItemsList");
+				var displayableItems = this.props.itemsCollection.models;
+				var selectItem = this.props.selectItem;
 				return _react2.default.createElement(
-					'div',
+					'ul',
 					null,
-					_react2.default.createElement(ItemSelectorMatchingItem, null),
-					_react2.default.createElement(ItemSelectorMatchingItem, null),
-					_react2.default.createElement(ItemSelectorMatchingItem, null)
+					displayableItems.map(function (elt) {
+						return _react2.default.createElement(ItemSelectorMatchingItem, { key: elt.toJSON().itemGID, itemDetails: elt, updateDisplayed: null, selectItem: selectItem });
+					})
 				);
 			}
 		}]);
@@ -19877,45 +19901,62 @@
 	var ItemSelectorMatchingItem = function (_React$Component4) {
 		_inherits(ItemSelectorMatchingItem, _React$Component4);
 	
-		function ItemSelectorMatchingItem() {
+		function ItemSelectorMatchingItem(props) {
 			_classCallCheck(this, ItemSelectorMatchingItem);
 	
-			return _possibleConstructorReturn(this, (ItemSelectorMatchingItem.__proto__ || Object.getPrototypeOf(ItemSelectorMatchingItem)).apply(this, arguments));
+			var _this4 = _possibleConstructorReturn(this, (ItemSelectorMatchingItem.__proto__ || Object.getPrototypeOf(ItemSelectorMatchingItem)).call(this, props));
+	
+			_this4.selectItem = _this4.selectItem.bind(_this4);
+			return _this4;
 		}
 	
 		_createClass(ItemSelectorMatchingItem, [{
 			key: 'render',
 			value: function render() {
-				return _react2.default.createElement(
-					'div',
-					null,
-					_react2.default.createElement(
-						'object',
-						{ type: 'application/x-shockwave-flash', data: 'http://tofus.fr/images/items/9290.swf', name: 'item', width: '110', height: '110' },
-						_react2.default.createElement('param', { name: 'movie', value: 'http://tofus.fr/images/items/9290.swf' }),
-						_react2.default.createElement('param', { name: 'wmode', value: 'transparent' }),
-						_react2.default.createElement('param', { name: 'quality', value: 'hight' }),
-						_react2.default.createElement('param', { name: 'allowScriptAccess', value: 'always' }),
-						_react2.default.createElement('param', { name: 'wmode', value: 'transparent' }),
-						_react2.default.createElement('param', { name: 'scale', value: 'exactfi' }),
-						_react2.default.createElement('param', { name: 'menu', value: 'false' })
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'itemName' },
-						'Alliance du Lévitrof'
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'itemType' },
-						'Anneau'
-					),
-					_react2.default.createElement(
-						'div',
-						{ className: 'itemLevel' },
-						'Niv. 200'
-					)
-				);
+				// console.log("render ItemSelectorMatchingItem");
+				var item = this.props.itemDetails.toJSON();
+				if (item.displayed) {
+					var itemGID = item.itemGID;
+					var url = "http://tofus.fr/images/items/" + itemGID + ".swf";
+					return _react2.default.createElement(
+						'li',
+						{ onMouseDown: this.selectItem },
+						_react2.default.createElement(
+							'object',
+							{ type: 'application/x-shockwave-flash', data: url, name: 'item', width: '110', height: '110' },
+							_react2.default.createElement('param', { name: 'movie', value: url }),
+							_react2.default.createElement('param', { name: 'wmode', value: 'transparent' }),
+							_react2.default.createElement('param', { name: 'quality', value: 'hight' }),
+							_react2.default.createElement('param', { name: 'allowScriptAccess', value: 'always' }),
+							_react2.default.createElement('param', { name: 'wmode', value: 'transparent' }),
+							_react2.default.createElement('param', { name: 'scale', value: 'exactfi' }),
+							_react2.default.createElement('param', { name: 'menu', value: 'false' })
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'itemName' },
+							item.label
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'itemType' },
+							item.category
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'itemLevel' },
+							'Niv. ',
+							item.lvl
+						)
+					);
+				} else {
+					return null;
+				}
+			}
+		}, {
+			key: 'selectItem',
+			value: function selectItem(e) {
+				this.props.selectItem(this.props.itemDetails);
 			}
 		}]);
 	
@@ -19931,7 +19972,7 @@
 			var _this5 = _possibleConstructorReturn(this, (ItemSelectorFiltersTextInput.__proto__ || Object.getPrototypeOf(ItemSelectorFiltersTextInput)).call(this, props));
 	
 			_this5.state = {
-				itemName: ""
+				searchText: ""
 			};
 			_this5.update = _this5.update.bind(_this5);
 			return _this5;
@@ -19940,12 +19981,15 @@
 		_createClass(ItemSelectorFiltersTextInput, [{
 			key: 'render',
 			value: function render() {
-				return _react2.default.createElement('input', { type: 'text', onChange: this.update, placeholder: 'Rechercher' });
+				// console.log("render ItemSelectorFiltersTextInput");
+				return _react2.default.createElement('input', { type: 'text', onChange: this.update, placeholder: 'Rechercher', value: this.state.searchText });
 			}
 		}, {
 			key: 'update',
 			value: function update(e) {
-				this.setState({ itemName: e.target.value });
+				this.setState({ searchText: e.target.value }, function () {
+					this.props.filtersChangedCallback(this.state.searchText);
+				});
 			}
 		}]);
 	
@@ -19964,7 +20008,16 @@
 		_createClass(SelectedItem, [{
 			key: 'render',
 			value: function render() {
-				return _react2.default.createElement('div', null);
+				// console.log("render SelectedItem");
+				if (this.props.selectedItem !== "") {
+					return _react2.default.createElement(
+						'div',
+						null,
+						this.props.selectedItem.toJSON().label
+					);
+				} else {
+					return null;
+				}
 			}
 		}]);
 	
