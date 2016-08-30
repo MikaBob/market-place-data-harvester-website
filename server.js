@@ -1,31 +1,38 @@
+//////////////////////////
+//
+// Includes
 var express = require("express");
 var fs = require("fs");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var crypto = require('crypto');
-var async = require('async');
-var NodeRSA = require('node-rsa');
+// var async = require('async');
+// var NodeRSA = require('node-rsa');
 
 
+//////////////////////////
+//
+// Settings
 var port = 8090;
-var dbName = "mongodb://localhost:27017/MarketPlaceDataHarvesterDB";
-var app = express();
-
 var userSessionExpirationTimeMinutes = 30;
 
+
+//////////////////////////
+//
+// Mongo setup
+var dbName = "mongodb://localhost:27017/MarketPlaceDataHarvesterDB";
 mongoose.connect(dbName);
 
 var UserSchema = new mongoose.Schema({
 	login:  String,
 	password: String,
-	salt: String,
+	/*salt: String,
 	session: {
 		salt: String,
 		expires: Date
-	}
+	}*/
 });
 var User = mongoose.model("user", UserSchema, "user");
-
 
 var PriceSchema = new mongoose.Schema({
 	itemId: Number,
@@ -38,15 +45,70 @@ var PriceSchema = new mongoose.Schema({
 });
 var Price = mongoose.model("price", PriceSchema, "price");
 
+var ItemSchema = new mongoose.Schema({
+	itemGID:  Number,
+	label: String,
+	lvl: Number,
+	type: String,
+	category: String
+});
+var ItemModel = mongoose.model("items", ItemSchema);
+
+
+//////////////////////////
+//
+// Starting app
+var app = express();
+app.use(express.static(__dirname + '/public/script'));
+app.use(express.static(__dirname + '/public/css'));
+app.use(express.static(__dirname + '/public'));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-var log = function (filename, data) {
-	fs.appendFile(filename, data + "\n", function(errorCode){if(errorCode){console.log("Unable to read log file " + filename)}});
-};
-
 app.listen(port);
 console.log("Server ready and listening on port " + port);
+
+
+//////////////////////////
+//
+// Download image
+var downloadImage = function(uri, filename, callback){
+  request.head(uri, function(err, res, body){
+    console.log('content-type:', res.headers['content-type']);
+    console.log('content-length:', res.headers['content-length']);
+
+    request(uri).pipe(fs.createWriteStream("public/images/items/" + filename)).on('close', callback);
+  });
+};
+
+// downloadImage('https://www.google.com/images/srpr/logo3w.png', 'google.png', function(){
+  // console.log('done');
+// });
+
+
+//////////////////////////
+//
+// REST commands handling
+
+// Get items list
+app.get("/items", function(req, res){
+	
+	console.log('GET /items');
+		
+	dbFind({
+		model: ItemModel,
+		filter: {},
+		success: function(values){
+			res.writeHead(200, {"content-type": "text/javascript"});
+			res.write(JSON.stringify(values));
+			res.end();
+		},
+		notFound: function(error){
+			sendError(res, 400, "No price matching filters");
+		}
+	});
+});
 
 // Item prices
 app.get("/item/:itemId", function(req, res){
@@ -59,7 +121,7 @@ app.get("/item/:itemId", function(req, res){
 	
 	if(def(itemId)){
 		
-		var filter = {itemId: parseInt(itemId)};
+		/*var filter = {itemId: parseInt(itemId)};
 		filter.timestamp = {};
 		
 		var startDate = dateFromTimestamp(startTime);
@@ -69,7 +131,7 @@ app.get("/item/:itemId", function(req, res){
 		var endDate = dateFromTimestamp(endTime);
 		if(endDate !== null){
 			filter.timestamp.$lt = endDate;
-		}
+		}*/
 		
 		dbFind({
 			model: Price,
@@ -132,7 +194,9 @@ app.post("/item/:itemId", function(req, res){
 						item.price_avg = parseInt(price_avg);
 					}
 					Price.create(item, function(){
-						res.writeHead(200, {"content-type": "text/javascript"});
+						/*res.writeHead(200, {"content-type": "text/javascript"});*/
+						//créer l'item schema
+						
 						res.write(JSON.stringify({success: true}));
 						res.end();
 					});
@@ -149,21 +213,22 @@ app.post("/item/:itemId", function(req, res){
 	});
 });
 
-app.get("/:file.js", function(req, res){
-	var file = req.params.file;
-	console.log("requested file: ", file);
-	var fileFullPath = "./public_html/script/" + file + ".js";
-	if(fs.existsSync(fileFullPath)){
-		res.writeHead(200, {"content-type": "text/javascript"});
-		fs.createReadStream(fileFullPath).pipe(res);
-	} else {
-		send404(res);
-	}
-});
+// app.get("/:file.js", function(req, res){
+	// var file = req.params.file;
+	// console.log("requested file: ", file);
+	// var fileFullPath = "./public/script/" + file + ".js";
+	// if(fs.existsSync(fileFullPath)){
+		// res.writeHead(200, {"content-type": "text/javascript"});
+		// fs.createReadStream(fileFullPath).pipe(res);
+	// } else {
+		// send404(res);
+	// }
+// });
 
 app.get("/", function(req, res){
 	if(req.url === "/"){
-		req.url = "/public_html/index.html";
+		req.url = "/public/item_prices.html";
+		// req.url = "/public/index.html";
 	}
 	console.log("req.url = ", req.url);
 	if(fs.existsSync("." + req.url)){
@@ -264,6 +329,11 @@ app.post("/login", function(req, res){
 	}
 });
 
+
+//////////////////////////
+//
+// DB utils
+
 /**
  * Finds the first item of the collection described by options.model that matches options.filter
  * On success, the given callback function options.success(found_values) will be fired
@@ -307,6 +377,10 @@ var dbFind = function(options){
 	}
 };
 
+
+//////////////////////////
+//
+// Utils
 var dateFromTimestamp = function(dateText){
 	var timestamp=Date.parse(dateText)
 	return (! isNaN(timestamp)) ? new Date(timestamp) : null;
@@ -324,7 +398,6 @@ var func = function(value){
 	return typeof value === 'function';
 };
 
-
 var send404 = function(res){
 	sendError(res, 404, "404 / Page not found");
 };
@@ -341,6 +414,10 @@ var sendError = function(res, httpErrorCode, errorString, errorSource){
 
 var makeAuthToken = function(sessionSalt, password){
 	return crypto.createHash('sha256').update(password + sessionSalt).digest('hex');
+};
+
+var log = function (filename, data) {
+	fs.appendFile(filename, data + "\n", function(errorCode){if(errorCode){console.log("Unable to read log file " + filename)}});
 };
 
 
