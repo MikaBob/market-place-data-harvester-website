@@ -1,12 +1,14 @@
 //////////////////////////
 //
 // Includes
+// var async = require('async');
+var bodyParser = require("body-parser");
+var crypto = require('crypto');
 var express = require("express");
 var fs = require("fs");
-var bodyParser = require("body-parser");
+var http = require("http");
 var mongoose = require("mongoose");
-var crypto = require('crypto');
-// var async = require('async');
+var request = require("request");
 // var NodeRSA = require('node-rsa');
 
 
@@ -52,13 +54,14 @@ var ItemSchema = new mongoose.Schema({
 	type: String,
 	category: String
 });
-var ItemModel = mongoose.model("items", ItemSchema);
+var ItemModel = mongoose.model("item", ItemSchema);
 
 
 //////////////////////////
 //
 // Starting app
 var app = express();
+app.use(express.static(__dirname + '/public/images/items'));
 app.use(express.static(__dirname + '/public/script'));
 app.use(express.static(__dirname + '/public/css'));
 app.use(express.static(__dirname + '/public'));
@@ -68,23 +71,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.listen(port);
 console.log("Server ready and listening on port " + port);
-
-
-//////////////////////////
-//
-// Download image
-var downloadImage = function(uri, filename, callback){
-  request.head(uri, function(err, res, body){
-    console.log('content-type:', res.headers['content-type']);
-    console.log('content-length:', res.headers['content-length']);
-
-    request(uri).pipe(fs.createWriteStream("public/images/items/" + filename)).on('close', callback);
-  });
-};
-
-// downloadImage('https://www.google.com/images/srpr/logo3w.png', 'google.png', function(){
-  // console.log('done');
-// });
 
 
 //////////////////////////
@@ -150,36 +136,43 @@ app.get("/item/:itemId", function(req, res){
 	}
 });
 
+
+
+/* 30/08/16	Pour le moment on oublie la partie authentification de l'utilisateur */
 app.post("/item/:itemId", function(req, res){
 	var itemId = req.params.itemId;
 	
 	console.log('POST /item/' + itemId);
 	
-	var username = req.body.username;
-	var authToken = req.body.authToken;
+	//var username = req.body.username;
+	//var authToken = req.body.authToken;
 	var price_1 = req.body.price_1;
 	var price_10 = req.body.price_10;
 	var price_100 = req.body.price_100;
 	var price_avg = req.body.price_avg;
 	
+	console.log('price_1:	' + price_1);
+	console.log('price_10:	' + price_10);
+	console.log('price_100:	' + price_100);
+	console.log('price_avg:	' + price_avg);
 	
-	
+	/*
 	if(undef(username) || undef(authToken)){
 		sendError(res, 400, "No username or auth token supplied");
 		return;
 	}
-	
+	*/
 	// Authentify user
-	dbFindOne({
+	/*dbFindOne({
 		model: User,
 		filter: JSON.stringify({login: username}),
 		success: function(user){
 			// Check if auth token is valid
 			if(def(user.session) &&user.session.expires > new Date().getTime()){
 				// Check if tokens match
-				if(makeAuthToken(user.session.salt, user.password) == authToken){
+				if(makeAuthToken(user.session.salt, user.password) == authToken){*/
 					var item = {itemId: parseInt(itemId)};
-					item.userId =  user._id;
+					//item.userId =  user._id;
 					item.timestamp =  new Date().getTime();
 					if(def(price_1)){
 						item.price_1 = parseInt(price_1);
@@ -196,10 +189,31 @@ app.post("/item/:itemId", function(req, res){
 					Price.create(item, function(){
 						/*res.writeHead(200, {"content-type": "text/javascript"});*/
 						//créer l'item schema
-						
-						res.write(JSON.stringify({success: true}));
+						console.log("Price of "+item.itemId+" added in bdd");
+						console.log(item);
+						res.write("OK"+item.itemId);
 						res.end();
+						dbFind({
+							model: ItemModel,
+							filter: JSON.stringify({itemGID: item.itemId}),
+							success: function(itemDetails){
+								console.log("Item already in bdd:");
+								console.log(itemDetails.length);
+								if(itemDetails.length == 0)
+								{
+									//Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie 
+									console.log("length == 0 | Item details not found in bdd, getItemDetailOnEncyclopedia("+item.itemId+")");
+									getItemDetailOnEncyclopedia(item.itemId);
+								}
+							},
+							notFound: function(error){
+								//Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie 
+								console.log("length == 0 | Item details not found in bdd, getItemDetailOnEncyclopedia("+item.itemId+")");
+								getItemDetailOnEncyclopedia(item.itemId);
+							}
+						});
 					});
+					/*
 				} else {
 					sendError(res, 400, "Invalid session token");
 				}
@@ -210,7 +224,7 @@ app.post("/item/:itemId", function(req, res){
 		notFound: function(error){
 			sendError(res, 400, "Inknown username");
 		}
-	});
+	});*/
 });
 
 // app.get("/:file.js", function(req, res){
@@ -421,14 +435,101 @@ var log = function (filename, data) {
 };
 
 
+var getItemDetailOnEncyclopedia = function(GID){
+	//var GID = 1455; // 1455 : aile de scarafeuille bleu
+	var options = {
+			host: 'www.dofus.com',
+			port: 80,
+			path: '/fr/mmorpg/encyclopedie/ressources/'+GID+'-'+GID
+	};
 
+	console.log("call to "+options.host+options.path);
+	var encyclopediaPage = "";
+	http.get(options, function(resp){
+			resp.on('data', function(chunk){
+					//console.log("new chunk: ");
+					//console.log(chunk);
+					encyclopediaPage += chunk;
+			});
+			resp.on("end", function(e){
+		
+				console.log("Encyclopedia page size:"+encyclopediaPage.length);
+				// coupé en feux regex car le 
+				var regex1 = /.*<title>([^-]+)-([^-]+)-([^-]+).*/;
+				var regex2 = /Niveau\s:\s(\d+)/;
+				var regex3 = /(http:\/\/staticns.ankama.com.*\.\.\/\.\.\/.*\.png)/
+				
+				var result1;
+				if ((result1 = regex1.exec(encyclopediaPage)) !== null) {
+					if (result1.index === regex1.lastIndex) {
+						regex1.lastIndex++;
+					}
+					/*console.log("result1:");
+					console.log("result1[0]:"+result1[0]);
+					console.log("result1[1]:"+result1[1]);
+					console.log("result1[2]:"+result1[2]);
+					console.log("result1[3]:"+result1[3]);
+					*/
+				}
+				
+				var result2;
+				if ((result2 = regex2.exec(encyclopediaPage)) !== null) {
+					if (result2.index === regex2.lastIndex) {
+						regex2.lastIndex++;
+					}
+					/*console.log("result2:");
+					console.log("result2[0]:"+result2[0]);
+					console.log("result2[1]:"+result2[1]);*/
+				}
+				
+				var result3;
+				if ((result3 = regex3.exec(encyclopediaPage)) !== null) {
+					if (result3.index === regex3.lastIndex) {
+						regex3.lastIndex++;
+					}
+					/*console.log("result3:");
+					console.log("result3[0]:"+result3[0]);
+					console.log("result3[1]:"+result3[1]);*/					
+				}
+				
+				
+				/*console.log("Retour from encylopedia:");
+				console.log(result1[1]); // label
+				console.log(result1[3]); // type
+				console.log(result1[2]); // Catégorie
+				console.log(result2[1]); // Niveau
+				console.log(result3[1]); // Url de l'image
+				*/
+				
+				var itemDetail = {itemGID:parseInt(GID)};
+				itemDetail.label = result1[1];
+				itemDetail.type = result1[3];
+				itemDetail.category = result1[2];
+				itemDetail.lvl = parseInt(result2[1]);
+				
+				
+				
+				ItemModel.create(itemDetail, function(){
+					console.log("Details of item "+GID+" added in bdd");
+					console.log(itemDetail);
+					downloadImage(result3[1], GID+'.png', function(){
+						console.log('Added image '+'public/images/items/'+GID+'.png'+ '	from '+result3[1]);
+					});
+				});
+			});
+	}).on("error", function(e){
+			console.log("Got error: " + e.message);
+	});
+};
 
+//////////////////////////
+//
+// Download image
+var downloadImage = function(uri, filename, callback){
+  request.head(uri, function(err, res, body){
+    console.log('content-type:', res.headers['content-type']);
+    console.log('content-length:', res.headers['content-length']);
 
-
-
-
-
-
-
-
-
+    request(uri).pipe(fs.createWriteStream("public/images/items/" + filename)).on('close', callback);
+  });
+};
