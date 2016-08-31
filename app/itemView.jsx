@@ -72,18 +72,11 @@ class ItemSelectorMatchingItem extends React.Component {
 		var item = this.props.itemDetails.toJSON();
 		if(item.displayed){
 			var itemGID = item.itemGID;
-			var url = "http://tofus.fr/images/items/" + itemGID + ".swf";
+			// var url = "http://tofus.fr/images/items/" + itemGID + ".swf";
+			var url = "images/items/" + itemGID + ".png";
 			return (
 				<li onMouseDown={this.selectItem}>
-					<object type="application/x-shockwave-flash" data={url} name="item" width="110" height="110">
-						<param name="movie" value={url}></param>
-						<param name="wmode" value="transparent"></param>
-						<param name="quality" value="hight"></param>
-						<param name="allowScriptAccess" value="always"></param>
-						<param name="wmode" value="transparent"></param>
-						<param name="scale" value="exactfi"></param>
-						<param name="menu" value="false"></param>
-					</object>
+					<img src={url} alt="item image" height="100" width="100" />
 					<div className="itemName">{item.label}</div>
 					<div className="itemType">{item.category}</div>
 					<div className="itemLevel">Niv. {item.lvl}</div>
@@ -98,6 +91,16 @@ class ItemSelectorMatchingItem extends React.Component {
 		this.props.selectItem(this.props.itemDetails);
 	}
 }
+
+// <!--<object type="application/x-shockwave-flash" data={url} name="item" width="110" height="110">
+	// <param name="movie" value={url}></param>
+	// <param name="wmode" value="transparent"></param>
+	// <param name="quality" value="hight"></param>
+	// <param name="allowScriptAccess" value="always"></param>
+	// <param name="wmode" value="transparent"></param>
+	// <param name="scale" value="exactfi"></param>
+	// <param name="menu" value="false"></param>
+// </object>-->
 
 class ItemSelectorFiltersTextInput extends React.Component {
 	constructor(props) {
@@ -160,9 +163,7 @@ export class SelectedItemGraph extends React.Component {
 	}
 	
 	render () {
-		console.log("render SelectedItemGraph");
-		console.log(this.state);
-		console.log(this.props.selectedItem);
+		// console.log("render SelectedItemGraph");
 		if(this.state.loading){
 			var loadingImageUrl = "images/loading.swf";
 			return (
@@ -176,18 +177,18 @@ export class SelectedItemGraph extends React.Component {
 					<param name="menu" value="false"></param>
 				</object>
 			);
-		} else if(this.state.data !== null){
+		} else if(isdef(this.state.data.prices) && this.state.data !== null && ! $.isEmptyObject(this.state.data.prices)){
 			return (
-				<div>Donn&eacute;es de l'item</div>
+				<div>Donn&eacute;es de l'item {this.state.data.prices}</div>
 			);
 		} else {
 			return (
-				<div>Aucune donn&eacute;e sur cet item</div>
+				<div>Aucun prix pour cet item</div>
 			);
 		}
 	}
 	
 	finishedLoading (data) {
-		this.setState({/*loading: false, */data: data});
+		this.setState({loading: false, data: data});
 	}
 }

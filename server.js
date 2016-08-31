@@ -195,15 +195,17 @@ app.post("/item/:itemId", function(req, res){
 						res.end();
 						dbFind({
 							model: ItemModel,
-							filter: JSON.stringify({itemGID: item.itemId}),
+							filter: {itemGID: item.itemId},
 							success: function(itemDetails){
-								console.log("Item already in bdd:");
 								console.log(itemDetails.length);
 								if(itemDetails.length == 0)
 								{
+									// console.log("Item already in bdd:");
 									//Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie 
 									console.log("length == 0 | Item details not found in bdd, getItemDetailOnEncyclopedia("+item.itemId+")");
 									getItemDetailOnEncyclopedia(item.itemId);
+								} else {
+									console.log("Item already in bdd:");
 								}
 							},
 							notFound: function(error){
