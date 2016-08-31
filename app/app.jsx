@@ -102,7 +102,7 @@ class ItemPriceApp extends React.Component {
 		super(props);
 		this.state = {
 			itemsCollection: itemsCollection,
-			selectedItem: ""
+			selectedItem: null
 		};
 		this.onReceiveItems = this.onReceiveItems.bind(this);
 		this.selectItem = this.selectItem.bind(this);

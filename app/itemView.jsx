@@ -124,16 +124,70 @@ class ItemSelectorFiltersTextInput extends React.Component {
 }
 
 export class SelectedItem extends React.Component {
-  render () {
+	render () {
 		// console.log("render SelectedItem");
-		if(this.props.selectedItem !== ""){
+		if(this.props.selectedItem !== null){
 			return (
 				<div>
 					{this.props.selectedItem.toJSON().label}
+					<SelectedItemGraph selectedItem={this.props.selectedItem} />
 				</div>
 			);
 		} else {
-			return null;
+			return (
+				<div>Aucun item s&eacute;lectionn&eacute;</div>
+			);
 		}
+	}
+}
+
+export class SelectedItemGraph extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			loading: false,
+			data: null
+		};
+		this.finishedLoading = this.finishedLoading.bind(this);
+		
+		if(isdef(props.selectedItem) && props.selectedItem !== null){
+			this.state = {
+				loading: true,
+				data: null
+			};
+			query("item/" + props.selectedItem.toJSON().itemGID, {startTime: "", endTime: ""}, this.finishedLoading);
+		}
+	}
+	
+	render () {
+		console.log("render SelectedItemGraph");
+		console.log(this.state);
+		console.log(this.props.selectedItem);
+		if(this.state.loading){
+			var loadingImageUrl = "images/loading.swf";
+			return (
+				<object type="application/x-shockwave-flash" data={loadingImageUrl} name="item" width="500" height="500">
+					<param name="movie" value={loadingImageUrl}></param>
+					<param name="wmode" value="transparent"></param>
+					<param name="quality" value="hight"></param>
+					<param name="allowScriptAccess" value="always"></param>
+					<param name="wmode" value="transparent"></param>
+					<param name="scale" value="exactfi"></param>
+					<param name="menu" value="false"></param>
+				</object>
+			);
+		} else if(this.state.data !== null){
+			return (
+				<div>Donn&eacute;es de l'item</div>
+			);
+		} else {
+			return (
+				<div>Aucune donn&eacute;e sur cet item</div>
+			);
+		}
+	}
+	
+	finishedLoading (data) {
+		this.setState({/*loading: false, */data: data});
 	}
 }

@@ -177,7 +177,7 @@
 	
 			_this.state = {
 				itemsCollection: itemsCollection,
-				selectedItem: ""
+				selectedItem: null
 			};
 			_this.onReceiveItems = _this.onReceiveItems.bind(_this);
 			_this.selectItem = _this.selectItem.bind(_this);
@@ -19783,7 +19783,7 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.SelectedItem = exports.ItemSelector = undefined;
+	exports.SelectedItemGraph = exports.SelectedItem = exports.ItemSelector = undefined;
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
@@ -20009,19 +20009,91 @@
 			key: 'render',
 			value: function render() {
 				// console.log("render SelectedItem");
-				if (this.props.selectedItem !== "") {
+				if (this.props.selectedItem !== null) {
 					return _react2.default.createElement(
 						'div',
 						null,
-						this.props.selectedItem.toJSON().label
+						this.props.selectedItem.toJSON().label,
+						_react2.default.createElement(SelectedItemGraph, { selectedItem: this.props.selectedItem })
 					);
 				} else {
-					return null;
+					return _react2.default.createElement(
+						'div',
+						null,
+						'Aucun item sélectionné'
+					);
 				}
 			}
 		}]);
 	
 		return SelectedItem;
+	}(_react2.default.Component);
+	
+	var SelectedItemGraph = exports.SelectedItemGraph = function (_React$Component7) {
+		_inherits(SelectedItemGraph, _React$Component7);
+	
+		function SelectedItemGraph(props) {
+			_classCallCheck(this, SelectedItemGraph);
+	
+			var _this7 = _possibleConstructorReturn(this, (SelectedItemGraph.__proto__ || Object.getPrototypeOf(SelectedItemGraph)).call(this, props));
+	
+			_this7.state = {
+				loading: false,
+				data: null
+			};
+			_this7.finishedLoading = _this7.finishedLoading.bind(_this7);
+	
+			if (isdef(props.selectedItem) && props.selectedItem !== null) {
+				_this7.state = {
+					loading: true,
+					data: null
+				};
+				query("item/" + props.selectedItem.toJSON().itemGID, { startTime: "", endTime: "" }, _this7.finishedLoading);
+			}
+			return _this7;
+		}
+	
+		_createClass(SelectedItemGraph, [{
+			key: 'render',
+			value: function render() {
+				console.log("render SelectedItemGraph");
+				console.log(this.state);
+				console.log(this.props.selectedItem);
+				if (this.state.loading) {
+					var loadingImageUrl = "images/loading.swf";
+					return _react2.default.createElement(
+						'object',
+						{ type: 'application/x-shockwave-flash', data: loadingImageUrl, name: 'item', width: '500', height: '500' },
+						_react2.default.createElement('param', { name: 'movie', value: loadingImageUrl }),
+						_react2.default.createElement('param', { name: 'wmode', value: 'transparent' }),
+						_react2.default.createElement('param', { name: 'quality', value: 'hight' }),
+						_react2.default.createElement('param', { name: 'allowScriptAccess', value: 'always' }),
+						_react2.default.createElement('param', { name: 'wmode', value: 'transparent' }),
+						_react2.default.createElement('param', { name: 'scale', value: 'exactfi' }),
+						_react2.default.createElement('param', { name: 'menu', value: 'false' })
+					);
+				} else if (this.state.data !== null) {
+					return _react2.default.createElement(
+						'div',
+						null,
+						'Données de l\'item'
+					);
+				} else {
+					return _react2.default.createElement(
+						'div',
+						null,
+						'Aucune donnée sur cet item'
+					);
+				}
+			}
+		}, {
+			key: 'finishedLoading',
+			value: function finishedLoading(data) {
+				this.setState({ /*loading: false, */data: data });
+			}
+		}]);
+	
+		return SelectedItemGraph;
 	}(_react2.default.Component);
 
 /***/ },

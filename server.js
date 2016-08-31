@@ -121,8 +121,8 @@ app.get("/item/:itemId", function(req, res){
 	
 	if(def(itemId)){
 		
-		/*var filter = {itemId: parseInt(itemId)};
-		filter.timestamp = {};
+		var filter = {itemId: parseInt(itemId)};
+		/*filter.timestamp = {};
 		
 		var startDate = dateFromTimestamp(startTime);
 		if(startDate !== null){
