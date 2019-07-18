@@ -1,5 +1,5 @@
 installer mongodb
-	créer la base de données "MarketPlaceDataHarvesterDB"
+	crer la base de donnes "MarketPlaceDataHarvesterDB"
 		use MarketPlaceDataHarvesterDB
 
 installer nodejs
@@ -8,7 +8,7 @@ installer nodejs
 	npm install crypto
 	npm install express
 	npm install fs
-	npm install http
+	npm install https
 	npm install mongoose
 	npm install request
 
