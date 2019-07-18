@@ -1,0 +1,15 @@
+installer mongodb
+	créer la base de données "MarketPlaceDataHarvesterDB"
+		use MarketPlaceDataHarvesterDB
+
+installer nodejs
+	npm install npm --global
+	npm install body-parser
+	npm install crypto
+	npm install express
+	npm install fs
+	npm install http
+	npm install mongoose
+	npm install request
+
+Windows => reconfigurer les chemins des fichiers .bat

@@ -1,5 +1,5 @@
 @echo off
 
-B:
-cd Programs\MongoDB
-mongod --dbpath db
+C:
+cd "\Program Files\MongoDB\Server\4.0\bin"
+mongod --dbpath \Games\MarketPlaceDataHarvester\MarketPlaceDataHarvesterDB

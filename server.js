@@ -6,7 +6,7 @@ var bodyParser = require("body-parser");
 var crypto = require('crypto');
 var express = require("express");
 var fs = require("fs");
-var http = require("http");
+var http = require("https");
 var mongoose = require("mongoose");
 var request = require("request");
 // var NodeRSA = require('node-rsa');
@@ -242,11 +242,11 @@ app.post("/item/:itemId", function(req, res){
 // });
 
 app.get("/", function(req, res){
-	if(req.url === "/"){
-		req.url = "/public/item_prices.html";
-		// req.url = "/public/index.html";
-	}
 	console.log("req.url = ", req.url);
+	if(req.url === "/"){
+		//req.url = "/public/item_prices.html";
+		req.url = "/public/index.html";
+	}
 	if(fs.existsSync("." + req.url)){
 		res.writeHead(200, {"content-type": "text/html"});
 		fs.createReadStream("." + req.url).pipe(res);
@@ -446,32 +446,34 @@ var getItemDetailOnEncyclopedia = function(GID){
 	};
 
 	console.log("call to "+options.host+options.path);
-	var encyclopediaPage = "";
-	http.get(options, function(resp){
-			resp.on('data', function(chunk){
-					//console.log("new chunk: ");
-					//console.log(chunk);
+	http.get("https://"+options.host+options.path, (resp) => {
+			let encyclopediaPage = '';
+
+			resp.on('data', (chunk) => {
+				//	console.log("new chunk: ");
+				//	console.log(chunk);
 					encyclopediaPage += chunk;
 			});
-			resp.on("end", function(e){
+			resp.on("end", () => {
 		
 				console.log("Encyclopedia page size:"+encyclopediaPage.length);
-				// coupé en feux regex car le 
+				// coupé en deux regex car le 
+				
 				var regex1 = /.*<title>([^-]+)-([^-]+)-([^-]+).*/;
 				var regex2 = /Niveau\s:\s(\d+)/;
-				var regex3 = /(http:\/\/staticns.ankama.com.*\.\.\/\.\.\/.*\.png)/
+				var regex3 = /<img src="(https:\/\/s\.ankama\.com\/ww.*dofus\/www\/game\/.*png)/
 				
 				var result1;
 				if ((result1 = regex1.exec(encyclopediaPage)) !== null) {
 					if (result1.index === regex1.lastIndex) {
 						regex1.lastIndex++;
 					}
-					/*console.log("result1:");
+					console.log("result1:");
 					console.log("result1[0]:"+result1[0]);
 					console.log("result1[1]:"+result1[1]);
 					console.log("result1[2]:"+result1[2]);
 					console.log("result1[3]:"+result1[3]);
-					*/
+					
 				}
 				
 				var result2;
@@ -479,9 +481,9 @@ var getItemDetailOnEncyclopedia = function(GID){
 					if (result2.index === regex2.lastIndex) {
 						regex2.lastIndex++;
 					}
-					/*console.log("result2:");
+					console.log("result2:");
 					console.log("result2[0]:"+result2[0]);
-					console.log("result2[1]:"+result2[1]);*/
+					console.log("result2[1]:"+result2[1]);
 				}
 				
 				var result3;
@@ -489,20 +491,29 @@ var getItemDetailOnEncyclopedia = function(GID){
 					if (result3.index === regex3.lastIndex) {
 						regex3.lastIndex++;
 					}
-					/*console.log("result3:");
+					console.log("result3:");
 					console.log("result3[0]:"+result3[0]);
-					console.log("result3[1]:"+result3[1]);*/					
+					console.log("result3[1]:"+result3[1]);
 				}
 				
 				
-				/*console.log("Retour from encylopedia:");
-				console.log(result1[1]); // label
-				console.log(result1[3]); // type
-				console.log(result1[2]); // Catégorie
-				console.log(result2[1]); // Niveau
-				console.log(result3[1]); // Url de l'image
-				*/
+				console.log("Retour from encylopedia:");
+				if( result1 != null){
+					console.log(result1[1]); // label
+					console.log(result1[3]); // type
+					console.log(result1[2]); // Catégorie
+				}
+				if( result2 != null){
+					console.log(result2[1]); // Niveau
+				}
+				if( result3 != null){
+					console.log(result3[1]); // Url de l'image
+				}
 				
+				if(result1 == null || result2 == null || result3 == null){
+					console.log("Could not retrieve this item in encyclopedia");
+					return;
+				}
 				var itemDetail = {itemGID:parseInt(GID)};
 				itemDetail.label = result1[1];
 				itemDetail.type = result1[3];
@@ -518,6 +529,7 @@ var getItemDetailOnEncyclopedia = function(GID){
 						console.log('Added image '+'public/images/items/'+GID+'.png'+ '	from '+result3[1]);
 					});
 				});
+				
 			});
 	}).on("error", function(e){
 			console.log("Got error: " + e.message);
