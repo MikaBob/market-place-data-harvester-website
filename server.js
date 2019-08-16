@@ -2,30 +2,32 @@
 //
 // Includes
 // var async = require('async');
-var bodyParser = require("body-parser");
-var crypto = require('crypto');
-var express = require("express");
-var fs = require("fs");
-var http = require("https");
-var mongoose = require("mongoose");
-var request = require("request");
-// var NodeRSA = require('node-rsa');
+const bodyParser = require("body-parser");
+const crypto = require('crypto');
+const express = require("express");
+const fs = require("fs");
+const http = require("https");
 
+const request = require("request");
+// const NodeRSA = require('node-rsa');
+
+
+const mongoose = require("mongoose");
 
 //////////////////////////
 //
 // Settings
-var port = 8090;
-var userSessionExpirationTimeMinutes = 30;
+const port = 8090;
+const userSessionExpirationTimeMinutes = 30;
 
 
 //////////////////////////
 //
 // Mongo setup
-var dbName = "mongodb://localhost:27017/MarketPlaceDataHarvesterDB";
-mongoose.connect(dbName);
+mongoose.connect("mongodb://localhost:27017/MarketPlaceDataHarvesterDB", { useMongoClient: true });
+mongoose.Promise = global.Promise;
 
-var UserSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
 	login:  String,
 	password: String,
 	/*salt: String,
@@ -36,7 +38,7 @@ var UserSchema = new mongoose.Schema({
 });
 var User = mongoose.model("user", UserSchema, "user");
 
-var PriceSchema = new mongoose.Schema({
+const PriceSchema = new mongoose.Schema({
 	itemId: Number,
 	userId:  mongoose.Schema.Types.ObjectId,
 	timestamp: Date,
@@ -47,20 +49,20 @@ var PriceSchema = new mongoose.Schema({
 });
 var Price = mongoose.model("price", PriceSchema, "price");
 
-var ItemSchema = new mongoose.Schema({
+const ItemSchema = new mongoose.Schema({
 	itemGID:  Number,
 	label: String,
 	lvl: Number,
 	type: String,
 	category: String
 });
-var ItemModel = mongoose.model("item", ItemSchema);
+var Item = mongoose.model("item", ItemSchema, "item");
 
 
 //////////////////////////
 //
 // Starting app
-var app = express();
+const app = express();
 app.use(express.static(__dirname + '/public/images/items'));
 app.use(express.static(__dirname + '/public/script'));
 app.use(express.static(__dirname + '/public/css'));
@@ -70,12 +72,26 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.listen(port);
-console.log("Server ready and listening on port " + port);
+console.log(`Server ready and listening on ${port}`);
 
 
 //////////////////////////
 //
 // REST commands handling
+
+app.get("/", function(req, res){
+	console.log("req.url = ", req.url);
+	if(req.url === "/"){
+		//req.url = "/public/item_prices.html";
+		req.url = "/public/index.html";
+	}
+	if(fs.existsSync("." + req.url)){
+		res.writeHead(200, {"content-type": "text/html"});
+		fs.createReadStream("." + req.url).pipe(res);
+	} else {
+		send404(res);
+	}
+});
 
 // Get items list
 app.get("/items", function(req, res){
@@ -83,7 +99,7 @@ app.get("/items", function(req, res){
 	console.log('GET /items');
 		
 	dbFind({
-		model: ItemModel,
+		model: Item,
 		filter: {},
 		success: function(values){
 			res.writeHead(200, {"content-type": "text/javascript"});
@@ -187,22 +203,17 @@ app.post("/item/:itemId", function(req, res){
 						item.price_avg = parseInt(price_avg);
 					}
 					Price.create(item, function(){
-						/*res.writeHead(200, {"content-type": "text/javascript"});*/
 						//créer l'item schema
-						console.log("Price of "+item.itemId+" added in bdd");
-						console.log(item);
-						res.write("OK"+item.itemId);
+						res.write("OK_"+item.itemId);
 						res.end();
 						dbFind({
-							model: ItemModel,
+							model: Item,
 							filter: {itemGID: item.itemId},
 							success: function(itemDetails){
 								console.log(itemDetails.length);
 								if(itemDetails.length == 0)
 								{
-									// console.log("Item already in bdd:");
 									//Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie 
-									console.log("length == 0 | Item details not found in bdd, getItemDetailOnEncyclopedia("+item.itemId+")");
 									getItemDetailOnEncyclopedia(item.itemId);
 								} else {
 									console.log("Item already in bdd:");
@@ -210,7 +221,6 @@ app.post("/item/:itemId", function(req, res){
 							},
 							notFound: function(error){
 								//Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie 
-								console.log("length == 0 | Item details not found in bdd, getItemDetailOnEncyclopedia("+item.itemId+")");
 								getItemDetailOnEncyclopedia(item.itemId);
 							}
 						});
@@ -240,20 +250,6 @@ app.post("/item/:itemId", function(req, res){
 		// send404(res);
 	// }
 // });
-
-app.get("/", function(req, res){
-	console.log("req.url = ", req.url);
-	if(req.url === "/"){
-		//req.url = "/public/item_prices.html";
-		req.url = "/public/index.html";
-	}
-	if(fs.existsSync("." + req.url)){
-		res.writeHead(200, {"content-type": "text/html"});
-		fs.createReadStream("." + req.url).pipe(res);
-	} else {
-		send404(res);
-	}
-});
 
 // Auth
 app.post("/register", function(req, res){
@@ -445,20 +441,17 @@ var getItemDetailOnEncyclopedia = function(GID){
 			path: '/fr/mmorpg/encyclopedie/ressources/'+GID+'-'+GID
 	};
 
-	console.log("call to "+options.host+options.path);
+	//console.log("call to "+options.host+options.path);
 	http.get("https://"+options.host+options.path, (resp) => {
 			let encyclopediaPage = '';
 
 			resp.on('data', (chunk) => {
-				//	console.log("new chunk: ");
-				//	console.log(chunk);
 					encyclopediaPage += chunk;
 			});
 			resp.on("end", () => {
 		
-				console.log("Encyclopedia page size:"+encyclopediaPage.length);
-				// coupé en deux regex car le 
-				
+				// La page est "découpée" en trois regex
+
 				var regex1 = /.*<title>([^-]+)-([^-]+)-([^-]+).*/;
 				var regex2 = /Niveau\s:\s(\d+)/;
 				var regex3 = /<img src="(https:\/\/s\.ankama\.com\/ww.*dofus\/www\/game\/.*png)/
@@ -467,13 +460,7 @@ var getItemDetailOnEncyclopedia = function(GID){
 				if ((result1 = regex1.exec(encyclopediaPage)) !== null) {
 					if (result1.index === regex1.lastIndex) {
 						regex1.lastIndex++;
-					}
-					console.log("result1:");
-					console.log("result1[0]:"+result1[0]);
-					console.log("result1[1]:"+result1[1]);
-					console.log("result1[2]:"+result1[2]);
-					console.log("result1[3]:"+result1[3]);
-					
+					}					
 				}
 				
 				var result2;
@@ -481,9 +468,6 @@ var getItemDetailOnEncyclopedia = function(GID){
 					if (result2.index === regex2.lastIndex) {
 						regex2.lastIndex++;
 					}
-					console.log("result2:");
-					console.log("result2[0]:"+result2[0]);
-					console.log("result2[1]:"+result2[1]);
 				}
 				
 				var result3;
@@ -491,27 +475,25 @@ var getItemDetailOnEncyclopedia = function(GID){
 					if (result3.index === regex3.lastIndex) {
 						regex3.lastIndex++;
 					}
-					console.log("result3:");
-					console.log("result3[0]:"+result3[0]);
-					console.log("result3[1]:"+result3[1]);
 				}
 				
-				
+				/*
 				console.log("Retour from encylopedia:");
 				if( result1 != null){
-					console.log(result1[1]); // label
-					console.log(result1[3]); // type
-					console.log(result1[2]); // Catégorie
+					console.log("label:" + result1[1]); // label
+					console.log("type: " + result1[3]); // type
+					console.log("catégorie: " + result1[2]); // Catégorie
 				}
 				if( result2 != null){
-					console.log(result2[1]); // Niveau
+					console.log("niveau: " + result2[1]); // Niveau
 				}
 				if( result3 != null){
-					console.log(result3[1]); // Url de l'image
+					console.log("url: " + result3[1]); // Url de l'image
 				}
+				*/
 				
 				if(result1 == null || result2 == null || result3 == null){
-					console.log("Could not retrieve this item in encyclopedia");
+					console.log("Could not retrieve enougth info from encyclopedia - GID: "+GID);
 					return;
 				}
 				var itemDetail = {itemGID:parseInt(GID)};
@@ -520,10 +502,8 @@ var getItemDetailOnEncyclopedia = function(GID){
 				itemDetail.category = result1[2];
 				itemDetail.lvl = parseInt(result2[1]);
 				
-				
-				
-				ItemModel.create(itemDetail, function(){
-					console.log("Details of item "+GID+" added in bdd");
+				Item.create(itemDetail, function(){
+					console.log("Details from encyclopedia of item "+GID+" added in bdd");
 					console.log(itemDetail);
 					downloadImage(result3[1], GID+'.png', function(){
 						console.log('Added image '+'public/images/items/'+GID+'.png'+ '	from '+result3[1]);
