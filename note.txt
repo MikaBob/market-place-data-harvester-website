@@ -1,5 +1,5 @@
 installer mongodb
-	créer la base de données "MarketPlaceDataHarvesterDB"
+	crer la base de donnes "MarketPlaceDataHarvesterDB"
 		use MarketPlaceDataHarvesterDB
 
 Données de test à insérer dans la bdd (L'aile de Tofu n'a pas d'image)
