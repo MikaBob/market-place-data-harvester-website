@@ -1,0 +1,13 @@
+{
+    "name": "server",
+    "version": "1.0.0",
+    "private": true,
+    "description": "If you don't know what is this about, then you can keep not knowing",
+    "main": "server.js",
+    "author": "B&B",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "mongoose": "^5.6.10"
+    }
+}

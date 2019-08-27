@@ -1,0 +1,8 @@
+body {
+    margin: 0;
+    padidng: 0;
+}
+
+.menu.navbar > .navbar-expand-lg {
+    width: 100%;
+}

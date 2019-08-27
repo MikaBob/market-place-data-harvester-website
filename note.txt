@@ -1,25 +1,50 @@
 installer mongodb
-	crer la base de donnes "MarketPlaceDataHarvesterDB"
-		use MarketPlaceDataHarvesterDB
+	crer la base de donnees "MarketPlaceDataHarvesterDB"
+		cd "\Program Files\MongoDB\Server\4.0\bin"													<= path where mongod.exe is
+		mongod --dbpath "\Path\To\DB\MarketPlaceDataHarvester\MarketPlaceDataHarvesterDB"			<= path where to physically store DB
+	ça lancera une invite de commande qui tourne indépendemment
+	pour manipuler un peu la DB:
+		cd "\Program Files\MongoDB\Server\4.0\bin"													<= path where mongo.exe is (not mongod.exe)
+		mongo
+			use MarketPlaceDataHarvesterDB															<= create or switch to DB
+		petit rappel de commandes pour mongo:
+			show dbs										<= affiche les DB présentes
+			show collections								<= affiche les collections présentes dans la DB sélectionnner
+			db.collection.find({})							<= équivalent du SELECT en SQL
+			db.collection.drop()							<= vide la colleciton
+			
+		Donnees de test à inserer dans la bdd (L'aile de Tofu n'a pas d'image)
+			db.item.insert({ "itemGID" : 376, "label" : "Aile du Tofu Malefique ", "type" : " Ressource ", "category" : " Aile ", "lvl" : 26 });
+			db.item.insert({ "itemGID" : 1457, "label" : "Ailes de Scarafeuille Rouge ", "type" : " Ressource ", "category" : " Aile ", "lvl" : 38 }); 
+			db.price.insert({ "itemGID" : 307, "timestamp" : ISODate("2019-07-17T20:30:19.893Z"), "price_1" : 285, "price_10" : 3593, "price_100" : 34899, "price_avg" : 222 });
+			db.price.insert({ "itemGID" : 1457, "timestamp" : ISODate("2019-07-18T14:50:40.948Z"), "price_1" : 298, "price_10" : 3699, "price_100" : 47985, "price_avg" : 435 });
+			db.user.insert({ "login" : "admin", "password" : "admin" });
+			db.user.insert({ "login" : "user", "password" : "a" });
 
-Données de test à insérer dans la bdd (L'aile de Tofu n'a pas d'image)
-	db.items.insert({ "_id" : ObjectId("5d30841f0b624610147267cc"), "itemGID" : 376, "label" : "Aile du Tofu Maléfique ", "type" : " Ressource ", "category" : " Aile ", "lvl" : 26, "__v" : 0 });
-	db.items.insert({ "_id" : ObjectId("5d3087411e158c46e8481056"), "itemGID" : 1457, "label" : "Ailes de Scarafeuille Rouge ", "type" : " Ressource ", "category" : " Aile ", "lvl" : 38, "__v" : 0 }); 
-	db.price.insert({ "_id" : ObjectId("5d2f855b63c05c2ab476b60e"), "itemId" : 307, "timestamp" : ISODate("2019-07-17T20:30:19.893Z"), "price_1" : 285, "price_10" : 3593, "price_100" : 34899, "price_avg" : 222, "__v" : 0 });
-	db.price.insert({ "_id" : ObjectId("5d3087401e158c45e8481053"), "itemId" : 1457, "timestamp" : ISODate("2019-07-18T14:50:40.948Z"), "price_1" : 298, "price_10" : 3699, "price_100" : 47985, "price_avg" : 435, "__v" : 0 });
 
-installer nodejs
-	npm install npm --global
-	npm install body-parser
-	npm install crypto
-	npm install express
-	npm install fs
-	npm install https
-	npm install mongoose
-	npm install request
+Présentation du site web:
+	il y a deux parties, donc deux codes différents:
+		- Backend, app basée sur express. C'est ici que l'on accèdes aux ajouts/modifications des données.
+		- Frontend, basé sur react. Le site web à proprement parlé où nous affichons en tout beau tout propre les données
 
-Windows => reconfigurer les chemins des fichiers .bat
-
-
-
-
+installer les app
+	backend:
+			npm install npm --global						<= met npm à jour
+			cd server										<= passe aux sources du backend
+			npm install										<= install les node_modules du site web frontend (c'est long genre 5-10min)
+			
+	et on est bon, un simple "node server.js" lancera le serveur. Pour ne pas avoir à relancer le serveur à chaque modification, utiliser nodemon:
+	
+			npm install nodemon -g
+			nodemon server/server.js						<= le serveur se relancera à chaque modif
+			
+	frontend:	
+		Tout d'abords, creer un fichier .env à la racine (/.env) qui contiendra les configs server pour le frontend (si c'est pas déjà fait)
+		Dans votre fichier .env écrire (Le nom des variables sont normées par React)
+		
+				PORT=8080									<= ou autre chose selon le port désiré x)
+				PUBLIC_URL=./public							<= dépot des sources html (ça ne devrait pas changer mais sinon react prend un répertoire de merde)
+		
+		A partir de là un simple...
+				npm install									<= install les node_modules du site web backend
+		est suffisant. Pour react, il faut lancer la commande "npm start" et le serveur se relance déjà pour chaque modif (no need nodemon)

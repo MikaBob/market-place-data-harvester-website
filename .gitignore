@@ -1,5 +1,9 @@
-node_modules/
-public/bundle.js
-public/bundle.js.map
-public/images/items/
+# dependencies
+/node_modules
+/backend/node_modules
 
+# production
+/build
+
+# IDE
+/nbproject
