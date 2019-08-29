@@ -58,6 +58,16 @@ app.get("*.css", function(req, res){
     }
 });
 
+app.get("*.png", function(req, res){
+    console.log("GET *.png  = ", req.url);
+
+    var imagesRepo = PUBLIC_URL+"/images/";
+    if(fs.existsSync(imagesRepo + req.url)){
+        res.writeHead(200, {"content-type": "text/css"});
+        fs.createReadStream(imagesRepo + req.url).pipe(res);
+    }
+});
+
 // Start Server
 app.listen(PORT);
 console.log(`Server ready and listening on ${PORT}`);
