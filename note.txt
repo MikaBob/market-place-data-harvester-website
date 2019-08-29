@@ -30,7 +30,7 @@ Présentation du site web:
 installer les app
 	backend:
 			npm install npm --global						<= met npm à jour
-			cd server										<= passe aux sources du backend
+			cd backend										<= passe aux sources du backend
 			npm install										<= install les node_modules du site web frontend (c'est long genre 5-10min)
 			
 	et on est bon, un simple "node server.js" lancera le serveur. Pour ne pas avoir à relancer le serveur à chaque modification, utiliser nodemon:
