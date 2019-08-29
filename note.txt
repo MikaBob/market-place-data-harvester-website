@@ -1,19 +1,19 @@
 installer mongodb
-	crer la base de donnees "MarketPlaceDataHarvesterDB"
+	cr√©er la base de donn√©es "MarketPlaceDataHarvesterDB"
 		cd "\Program Files\MongoDB\Server\4.0\bin"													<= path where mongod.exe is
 		mongod --dbpath "\Path\To\DB\MarketPlaceDataHarvester\MarketPlaceDataHarvesterDB"			<= path where to physically store DB
-	Áa lancera une invite de commande qui tourne indÈpendemment
+	√ßa lancera une invite de commande qui tourne ind√©pendemment
 	pour manipuler un peu la DB:
 		cd "\Program Files\MongoDB\Server\4.0\bin"													<= path where mongo.exe is (not mongod.exe)
 		mongo
 			use MarketPlaceDataHarvesterDB															<= create or switch to DB
 		petit rappel de commandes pour mongo:
-			show dbs										<= affiche les DB prÈsentes
-			show collections								<= affiche les collections prÈsentes dans la DB sÈlectionnner
-			db.collection.find({})							<= Èquivalent du SELECT en SQL
+			show dbs										<= affiche les DB pr√©sentes
+			show collections								<= affiche les collections pr√©sentes dans la DB s√©lectionnner
+			db.collection.find({})							<= √©quivalent du SELECT en SQL
 			db.collection.drop()							<= vide la colleciton
 			
-		Donnees de test ‡ inserer dans la bdd (L'aile de Tofu n'a pas d'image)
+		Donn√©es de test √† inserer dans la bdd (L'aile de Tofu n'a pas d'image)
 			db.item.insert({ "itemGID" : 376, "label" : "Aile du Tofu Malefique ", "type" : " Ressource ", "category" : " Aile ", "lvl" : 26 });
 			db.item.insert({ "itemGID" : 1457, "label" : "Ailes de Scarafeuille Rouge ", "type" : " Ressource ", "category" : " Aile ", "lvl" : 38 }); 
 			db.price.insert({ "itemGID" : 307, "timestamp" : ISODate("2019-07-17T20:30:19.893Z"), "price_1" : 285, "price_10" : 3593, "price_100" : 34899, "price_avg" : 222 });
@@ -22,29 +22,29 @@ installer mongodb
 			db.user.insert({ "login" : "user", "password" : "a" });
 
 
-PrÈsentation du site web:
-	il y a deux parties, donc deux codes diffÈrents:
-		- Backend, app basÈe sur express. C'est ici que l'on accËdes aux ajouts/modifications des donnÈes.
-		- Frontend, basÈ sur react. Le site web ‡ proprement parlÈ o˘ nous affichons en tout beau tout propre les donnÈes
+Pr√©sentation du site web:
+	il y a deux parties, donc deux codes diff√©rents:
+		- Backend, app bas√©e sur express. C'est ici que l'on acc√®des aux ajouts/modifications des donn√©es.
+		- Frontend, bas√© sur react. Le site web √† proprement parler o√π nous affichons en tout beau tout propre les donn√©es
 
 installer les app
 	backend:
-			npm install npm --global						<= met npm ‡ jour
+			npm install npm --global						<= met npm √† jour
 			cd server										<= passe aux sources du backend
 			npm install										<= install les node_modules du site web frontend (c'est long genre 5-10min)
 			
-	et on est bon, un simple "node server.js" lancera le serveur. Pour ne pas avoir ‡ relancer le serveur ‡ chaque modification, utiliser nodemon:
+	et on est bon, un simple "node server.js" lancera le serveur. Pour ne pas avoir √† relancer le serveur √† chaque modification, utiliser nodemon:
 	
 			npm install nodemon -g
-			nodemon server/server.js						<= le serveur se relancera ‡ chaque modif
+			nodemon server/server.js						<= le serveur se relancera √† chaque modif
 			
 	frontend:	
-		Tout d'abords, creer un fichier .env ‡ la racine (/.env) qui contiendra les configs server pour le frontend (si c'est pas dÈj‡ fait)
-		Dans votre fichier .env Ècrire (Le nom des variables sont normÈes par React)
+		Tout d'abord, cr√©er un fichier .env √† la racine (/.env) qui contiendra les configs server pour le frontend (si c'est pas d√©j√† fait)
+		Dans votre fichier .env √©crire (Les noms des variables sont norm√©s par React)
 		
-				PORT=8080									<= ou autre chose selon le port dÈsirÈ x)
-				PUBLIC_URL=./public							<= dÈpot des sources html (Áa ne devrait pas changer mais sinon react prend un rÈpertoire de merde)
+				PORT=8080									<= ou autre chose selon le port d√©sir√© x)
+				PUBLIC_URL=./public							<= d√©pot des sources html (√ßa ne devrait pas changer mais sinon react prend un r√©pertoire de merde)
 		
-		A partir de l‡ un simple...
+		A partir de l√† un simple...
 				npm install									<= install les node_modules du site web backend
-		est suffisant. Pour react, il faut lancer la commande "npm start" et le serveur se relance dÈj‡ pour chaque modif (no need nodemon)
+		est suffisant. Pour react, il faut lancer la commande "npm start" et le serveur se relance d√©j√† pour chaque modif (no need nodemon)
