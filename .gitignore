@@ -7,3 +7,7 @@
 
 # IDE
 /nbproject
+
+# images
+!/public/images/items/1457.png
+/public/images/items/*

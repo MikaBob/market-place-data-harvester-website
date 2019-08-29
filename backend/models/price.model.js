@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 
 const priceSchema = new mongoose.Schema({
-    itemId:  mongoose.Schema.Types.ObjectId, // /!\ ce n'est pas le GID, mais l'ID de la DB
-    userId:  mongoose.Schema.Types.ObjectId,
+    itemGID: {
+        type: Number,
+        required: true,
+    },
+    userId: mongoose.Schema.Types.ObjectId,
     timestamp: Date,
     price_1: Number,
     price_10: Number,
