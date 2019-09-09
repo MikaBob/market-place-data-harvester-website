@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
-export default class Menubar extends Component {
+export default class Header extends Component {
 
     render() {
         return (
-            <div className="row menu navbar bg-primary">
-                <nav className="navbar navbar-expand-lg navbar-light bg-primary">
+            <div className="row menu navbar bg-primary rounded-bottom mb-3">
+                <nav className="navbar navbar-expand-lg w-100 navbar-light bg-primary">
                     <Link to="/" className="navbar-brand">MPDH</Link>
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>

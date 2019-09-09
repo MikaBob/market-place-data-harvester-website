@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route} from "react-router-dom";
 
-import Menubar from "./components/menubar.component"
+import Header from "./components/header.component"
 import Search from "./components/search.component"
 import Item from "./components/item.component"
+import Footer from "./components/footer.component"
 
 function App() {
 
@@ -16,11 +17,11 @@ function App() {
 
     return (
             <Router>
-                <div className="container">
-                    <Menubar />
-                    <br/>
+                    <div className="body">
+                    <Header />
                     <Route path="/search" exact component={Search} />
                     <Route path="/item/:itemGID" exact component={Item} />
+                    <Footer />
                 </div>
             </Router>
             );

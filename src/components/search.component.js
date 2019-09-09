@@ -4,16 +4,16 @@ import axios from 'axios';
 
 
 const ItemRow = props => (
-    <tr>
-        <td>{props.item.label}</td>
-        <td>{props.item.lvl}</td>
-        <td>{props.item.type}</td>
-        <td>{props.item.category}</td>
-        <td>
-            <Link to={"/item/" + props.item.itemGID}>See prices</Link>
-        </td>
-    </tr>
-)
+            <tr>
+                <td>{props.item.label}</td>
+                <td>{props.item.lvl}</td>
+                <td>{props.item.type}</td>
+                <td>{props.item.category}</td>
+                <td>
+                    <Link to={"/item/" + props.item.itemGID}>See prices</Link>
+                </td>
+            </tr>
+            );
 
 export default class Search extends Component {
 
@@ -50,26 +50,24 @@ export default class Search extends Component {
 
     render() {
         return (
-                <div>
-                    <div className="row form-group">
+                <div className="row border border-light py-2">
+                    <div className="container-fluid form-group mx-0 px-0">
                         <input type="search" onChange={this.onChangeSearch} value={this.state.itemName} className="form-control" placeholder="Search for an item"/>
                     </div>
-                    <div className="row">
-                        <table className="table">
-                            <thead className="thead-light">
-                                <tr>
-                                    <th>Label</th>
-                                    <th>Level</th>
-                                    <th>Type</th>
-                                    <th>Category</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                { this.refreshItemList() }
-                            </tbody>
-                        </table>
-                    </div>
+                    <table className="table">
+                        <thead className="thead-light">
+                            <tr>
+                                <th>Label</th>
+                                <th>Level</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            { this.refreshItemList() }
+                        </tbody>
+                    </table>
                 </div>
                 );
     }
