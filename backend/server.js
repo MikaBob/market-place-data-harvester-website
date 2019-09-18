@@ -2,15 +2,17 @@ const express   = require('express');   // excellent router
 const cors      = require('cors');      // Cross-Origin Ressource Sharing (pour communiqué entre seveur (frontend/backend))
 const mongoose  = require('mongoose');  // On ne le présente plus
 const fs        = require('fs');        // file system access simplified
+const dotenv    = require('dotenv').config({ path: '../.env' }); // environement variable (shared with frontend)
 
 const PORT = 8090;
-const DB_HOST = "mongodb://localhost:27017/MarketPlaceDataHarvesterDB";
-const PUBLIC_URL = "../public";
+const DB_HOST = process.env.MONGO_URL;
+const PUBLIC_URL = "../"+process.env.PUBLIC_URL+"public/";
 
 const app = express();
 
 
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
@@ -24,11 +26,10 @@ connection.once('open', () => {
 
 
 // Routing
-const itemRouter = require('./routes/item');
-const userRouter = require('./routes/user');
-
-app.use('/item', itemRouter);
-app.use('/user', userRouter);
+app.use('/item', require('./routes/item'));
+app.use('/user', require('./routes/user'));
+app.use('/prices', require('./routes/prices'));
+app.use('/login', require('./routes/login'));
 
 
 app.get("/", function(req, res){

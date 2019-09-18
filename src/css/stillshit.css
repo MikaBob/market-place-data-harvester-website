@@ -1,10 +1,39 @@
 .body {
     margin: auto;
-    padidng: 0;
+    padding: 0;
     max-width: 1200px;
 }
 
 
 .datepickers-for-chart .react-datepicker-wrapper {
     width: 75%;
+}
+
+/*
+    xs <  576
+    sm >= 576
+    md >= 768
+    lg >= 992
+    xl >= 1200
+*/
+
+/* For sm and less  */
+@media (max-width: 576px) {
+    .login-form {
+        width: 100%
+    }
+}
+
+/* For md and more  */
+@media (min-width: 576px) {
+    .login-form {
+        width: 50%
+    }
+}
+
+/* For lg and more  */
+@media (min-width: 992px) {
+    .login-form {
+        width: 33%
+    }
 }

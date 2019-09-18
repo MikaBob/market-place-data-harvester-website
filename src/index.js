@@ -1,6 +1,9 @@
-import React from 'react';
+import React    from 'react';
 import ReactDOM from 'react-dom';
-import App from './app';
+import App      from './app';
+
+import { Provider } from 'react-redux';
+import store        from './redux/store';
 
 // Stillshit
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
@@ -11,4 +14,4 @@ import "./css/stillshit.css";
 import "../node_modules/jquery/dist/jquery.min.js";
 import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 
-ReactDOM.render(<App />, document.getElementById('MPDH'));
+ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('MPDH'));

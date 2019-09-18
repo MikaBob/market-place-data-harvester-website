@@ -13,6 +13,4 @@ const priceSchema = new mongoose.Schema({
     price_avg: Number
 });
 
-const Price = mongoose.model("price", priceSchema, "price");
-
-module.exports = Price;
+module.exports = Price = mongoose.model("price", priceSchema, "price");

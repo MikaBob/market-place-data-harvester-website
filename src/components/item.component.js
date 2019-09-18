@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import DatePicker from "react-datepicker";
 import { format, isAfter, subDays } from 'date-fns'
+import axios                from 'axios';
+import { Line }             from 'react-chartjs-2';
+import DatePicker           from "react-datepicker";
 
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -10,7 +10,7 @@ const COLORS = [
     'rgba(191, 213, 0, 0.5)',
     'rgba(95, 106, 87, 0.5)',
     'rgba(46, 139, 87, 0.5)',
-    'rgba(255, 153, 0, 0.5)',
+    'rgba(255, 153, 0, 0.5)'
 ];
 
 export default class Item extends Component {
@@ -91,6 +91,7 @@ export default class Item extends Component {
                             }
                         ]};
 
+                    var cpt = 0;
                     response.data.forEach(function (price) {
                         var timestamp = new Date(price.timestamp);
                         dataForChart.labels.push(timestamp.getMonth() + "/" + timestamp.getDate() + "-" + timestamp.getHours() + "h" + timestamp.getMinutes());
@@ -98,7 +99,9 @@ export default class Item extends Component {
                         dataForChart.datasets[1].data.push(price.price_10);
                         dataForChart.datasets[2].data.push(price.price_100);
                         dataForChart.datasets[3].data.push(price.price_avg);
+                        cpt++;
                     });
+                    console.log(cpt);
                     this.setState({chartData: dataForChart}, () => {
                         this.setScale(this.state.isScaleOn);
                     });

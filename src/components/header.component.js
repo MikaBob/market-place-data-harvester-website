@@ -1,8 +1,17 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link }             from 'react-router-dom';
+import { connect }          from 'react-redux';
+import PropTypes            from 'prop-types';
 
-export default class Header extends Component {
+import { logout }   from '../redux/actions/authActions';
 
+class Header extends Component {
+    
+    static propTypes = {
+        logout: PropTypes.func.isRequired
+    };
+    
+    
     render() {
         return (
             <div className="row menu navbar bg-primary rounded-bottom mb-3">
@@ -26,7 +35,7 @@ export default class Header extends Component {
                                 <Link to="/" className="nav-link">Profile</Link>
                             </li>
                             <li>
-                                <Link to="/" className="nav-link"><span className="glyphicon glyphicon-log-in"></span>Login</Link>
+                                <Link to="/" onClick={this.props.logout} className="nav-link">Logout</Link>
                             </li>
                         </ul>
                     </div>
@@ -35,3 +44,5 @@ export default class Header extends Component {
         );
     }
 }
+
+export default connect(null,{ logout })(Header);

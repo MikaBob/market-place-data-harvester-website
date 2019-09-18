@@ -10,17 +10,11 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }/*,
-    salt: {
-        type: String,
-        required: true
     },
-    session: {
-        salt: String,
-        expires: Date
-    }*/
+    register_date: {
+        type: Date,
+        default: Date.now
+    }
 });
 
-const User = mongoose.model("user", userSchema, "user");
-
-module.exports = User;
+module.exports = User = mongoose.model("user", userSchema, "user");

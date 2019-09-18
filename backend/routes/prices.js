@@ -1,25 +1,24 @@
-const router = require('express').Router();
-let Item = require('../../models/item.model');
-let Price = require('../../models/price.model');
+const router    = require('express').Router();
+const http      = require('https');
+const request   = require('request');
+const fs        = require('fs');
+
+let Item    = require('../models/item.model');
+let Price   = require('../models/price.model');
 
 
-/* 30/08/16	Pour le moment on oublie la partie authentification de l'utilisateur */
-router.route('/:itemId').post((req, res) => {
-    var itemId = req.params.itemId;
+/* 18/09/19	Pour le moment on oublie la partie authentification de l'utilisateur */
+router.post('/:itemGID', (req, res) => {
+    const itemGID = req.params.itemGID;
 
-    console.log('POST /item/' + itemId);
+    console.log("POST /prices \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
 
-    //var username = req.body.username;
-    //var authToken = req.body.authToken;
-    var price_1 = req.body.price_1;
-    var price_10 = req.body.price_10;
-    var price_100 = req.body.price_100;
-    var price_avg = req.body.price_avg;
+    const { price_1, price_10, price_100, price_avg } = req.body;
 
-    console.log('price_1:	' + price_1);
-    console.log('price_10:	' + price_10);
-    console.log('price_100:	' + price_100);
-    console.log('price_avg:	' + price_avg);
+    console.log('price_1:   ' + price_1);
+    console.log('price_10:  ' + price_10);
+    console.log('price_100: ' + price_100);
+    console.log('price_avg: ' + price_avg);
 
     /*
      if(undef(username) || undef(authToken)){
@@ -36,43 +35,33 @@ router.route('/:itemId').post((req, res) => {
      if(def(user.session) &&user.session.expires > new Date().getTime()){
      // Check if tokens match
      if(makeAuthToken(user.session.salt, user.password) == authToken){*/
-    var item = {itemId: parseInt(itemId)};
+    var item = {itemGID: parseInt(itemGID)};
     //item.userId =  user._id;
     item.timestamp = new Date().getTime();
-    if (def(price_1)) {
-        item.price_1 = parseInt(price_1);
-    }
-    if (def(price_10)) {
-        item.price_10 = parseInt(price_10);
-    }
-    if (def(price_100)) {
-        item.price_100 = parseInt(price_100);
-    }
-    if (def(price_avg)) {
-        item.price_avg = parseInt(price_avg);
-    }
+    item.price_1 = parseInt(price_1);
+    item.price_10 = parseInt(price_10);
+    item.price_100 = parseInt(price_100);
+    item.price_avg = parseInt(price_avg);
     Price.create(item, function () {
         //créer l'item schema
-        res.write("OK_" + item.itemId);
+        res.write("OK_" + item.itemGID);
         res.end();
-        dbFind({
-            model: Item,
-            filter: {itemGID: item.itemId},
-            success: function (itemDetails) {
+        
+        Item.findOne({itemGID: req.params.itemGID})
+            .then((itemDetails) => {
                 console.log(itemDetails.length);
                 if (itemDetails.length == 0)
                 {
                     //Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie
-                    getItemDetailOnEncyclopedia(item.itemId);
+                    getItemDetailOnEncyclopedia(item.itemGID);
                 } else {
                     console.log("Item already in bdd:");
                 }
-            },
-            notFound: function (error) {
+            })
+            .catch((err) => {
                 //Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie
-                getItemDetailOnEncyclopedia(item.itemId);
-            }
-        });
+                getItemDetailOnEncyclopedia(item.itemGID);
+            });
     });
     /*
      } else {

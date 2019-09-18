@@ -1,25 +1,31 @@
-const router = require('express').Router();
-let Item = require('../models/item.model');
-let Price = require('../models/price.model');
+const router    = require('express').Router();
+const auth      = require('../authentification');
+
+let Item    = require('../models/item.model');
+let Price   = require('../models/price.model');
 
 
-router.get('/list', function (req, res) {
+router.get('/list', auth, (req, res) => {
     console.log("GET /item/list \nparams:", req.params, "\nquery:", req.query);
+
+    if(typeof req.query.itemName === 'undefined' || req.query.itemName.length < 2 )
+        res.status(400).json('Search string must be at least 3 characters long');
+
     var filter = {"label": {"$regex": req.query.itemName, "$options": "i"}};
     Item.find(filter)
-            .then(items => res.json(items))
-            .catch(err => res.status(400).json('Error: ' + err));
+        .then(items => res.json(items))
+        .catch(err => res.status(400).json('Error: ' + err));
 });
 
 
-router.route('/:itemGID').get((req, res) => {
-    console.log("GET /item/:itemId \nparams:", req.params, "\nquery:", req.query);
+router.get('/:itemGID', auth, (req, res) => {
+    console.log("GET /item/:itemGID \nparams:", req.params, "\nquery:", req.query);
     Item.findOne({itemGID: req.params.itemGID})
             .then(item => res.json(item))
             .catch(err => res.status(400).json('Error: ' + err));
 });
 
-router.route('/:itemGID/prices').get((req, res) => {
+router.get('/:itemGID/prices', auth, (req, res) => {
     console.log("GET /item/:itemGID/prices/ \nparams:", req.params, "\nquery:", req.query);
     var itemGID = req.params.itemGID;       // req.params pour un parameter depuis l'URL
     var startTime = req.query.startTime;    // req.query pour un parameter depuis la requête

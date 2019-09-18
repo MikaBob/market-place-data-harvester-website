@@ -13,6 +13,4 @@ const itemSchema = new mongoose.Schema({
     category: { type: String, trim: true },
 });
 
-const Item = mongoose.model("item", itemSchema, "item");
-
-module.exports = Item;
+module.exports = Item = mongoose.model("item", itemSchema, "item");
