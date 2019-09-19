@@ -49,13 +49,10 @@ router.post('/:itemGID', (req, res) => {
         
         Item.findOne({itemGID: req.params.itemGID})
             .then((itemDetails) => {
-                console.log(itemDetails.length);
                 if (itemDetails.length == 0)
                 {
                     //Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie
                     getItemDetailOnEncyclopedia(item.itemGID);
-                } else {
-                    console.log("Item already in bdd:");
                 }
             })
             .catch((err) => {

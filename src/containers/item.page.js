@@ -6,7 +6,7 @@ import { format, isAfter, subDays } from 'date-fns'
 
 import "react-datepicker/dist/react-datepicker.css";
 
-const COLORS = [
+const GRAPH_COLORS = [
     'rgba(191, 213, 0, 0.5)',
     'rgba(95, 106, 87, 0.5)',
     'rgba(46, 139, 87, 0.5)',
@@ -34,6 +34,9 @@ export default class Item extends Component {
             label: '',
             type: '',
             category: '',
+            nbTimestamp: 0,
+            price_min: 0,
+            price_max: 0,
 
             // Charts
             chartData: {},
@@ -71,26 +74,26 @@ export default class Item extends Component {
                             {
                                 label: 'Price X1',
                                 data: [],
-                                borderColor: COLORS[0]
+                                borderColor: GRAPH_COLORS[0]
                             },
                             {
                                 label: 'Price X10',
                                 data: [],
-                                borderColor: COLORS[1]
+                                borderColor: GRAPH_COLORS[1]
                             },
                             {
                                 label: 'Price X100',
                                 data: [],
-                                borderColor: COLORS[2]
+                                borderColor: GRAPH_COLORS[2]
                             },
                             {
                                 label: 'Price average',
                                 data: [],
-                                borderColor: COLORS[3]
+                                borderColor: GRAPH_COLORS[3]
                             }
                         ]};
 
-                    var cpt = 0;
+                    var cpt = 0, max = 0, min = Math.pow(2,32);
                     response.data.forEach(function (price) {
                         var timestamp = new Date(price.timestamp);
                         dataForChart.labels.push(timestamp.getMonth() + "/" + timestamp.getDate() + "-" + timestamp.getHours() + "h" + timestamp.getMinutes());
@@ -98,10 +101,17 @@ export default class Item extends Component {
                         dataForChart.datasets[1].data.push(price.price_10);
                         dataForChart.datasets[2].data.push(price.price_100);
                         dataForChart.datasets[3].data.push(price.price_avg);
+                        max = max < price.price_100 ? price.price_100 : max;
+                        max = max < price.price_10 ? price.price_10 : max;
+                        max = max < price.price_1 ? price.price_1 : max;
+                        
+                        min = price.price_100 > 0 ? (min > price.price_100 ? price.price_100 : min) : min;
+                        min = price.price_10 > 0 ? (min > price.price_10 ? price.price_10 : min) : min;
+                        min = price.price_1 > 0 ? (min > price.price_1 ? price.price_1 : min) : min;
                         cpt++;
                     });
-                    console.log(cpt);
-                    this.setState({chartData: dataForChart}, () => {
+                    min = min == Math.pow(2,32) ? 0 : min;
+                    this.setState({chartData: dataForChart, nbTimestamp: cpt, price_min: min, price_max: max}, () => {
                         this.putToScale(this.state.isScaleOn);
                     });
                 })
@@ -160,6 +170,9 @@ export default class Item extends Component {
                                 <tr><td>Level</td><td>{this.state.lvl}</td></tr>
                                 <tr><td>Type</td><td>{this.state.type}</td></tr>
                                 <tr><td>Category</td><td>{this.state.category}</td></tr>
+                                <tr><td>Nb values</td><td>{this.state.nbTimestamp}</td></tr>
+                                <tr><td>Minimum</td><td>{this.state.price_min}</td></tr>
+                                <tr><td>Maximum</td><td>{this.state.price_max}</td></tr>
                             </tbody>
                         </table>
                     </div>
