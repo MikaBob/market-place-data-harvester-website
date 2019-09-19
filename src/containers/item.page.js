@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { format, isAfter, subDays } from 'date-fns'
 import axios                from 'axios';
 import { Line }             from 'react-chartjs-2';
 import DatePicker           from "react-datepicker";
+import { format, isAfter, subDays } from 'date-fns'
 
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -22,7 +22,7 @@ export default class Item extends Component {
         this.ChangeStartDate = this.ChangeStartDate.bind(this);
         this.ChangeEndDate = this.ChangeEndDate.bind(this);
         this.setDates = this.setDates.bind(this);
-        this.setScale = this.setScale.bind(this);
+        this.putToScale = this.putToScale.bind(this);
 
 
         var today = new Date();
@@ -45,7 +45,6 @@ export default class Item extends Component {
     }
 
     componentDidMount() {
-
         // Item description
         axios.get(process.env.API_URL + '/item/' + this.props.match.params.itemGID)
                 .then(response => {
@@ -103,7 +102,7 @@ export default class Item extends Component {
                     });
                     console.log(cpt);
                     this.setState({chartData: dataForChart}, () => {
-                        this.setScale(this.state.isScaleOn);
+                        this.putToScale(this.state.isScaleOn);
                     });
                 })
                 .catch(function (error) {
@@ -131,16 +130,16 @@ export default class Item extends Component {
     }
 
     ChangeScale() {
-        this.setScale(!this.state.isScaleOn);
+        this.putToScale(!this.state.isScaleOn);
         this.setState({isScaleOn: !this.state.isScaleOn});
     }
 
-    setScale(isPutToScale) {
+    putToScale(isPutToScale) {
         var updatedChartData = this.state.chartData;
 
         // loop througth price X10 and price X100
         for (var i = 1; i < 3; i++) {
-            if (isPutToScale) // possible en ternaire mais illisible
+            if (isPutToScale) // possible in ternaire but unreadable
                 updatedChartData.datasets[i].data = updatedChartData.datasets[i].data.map(value => value /= Math.pow(10, i)); // /10 & /100
             else
                 updatedChartData.datasets[i].data = updatedChartData.datasets[i].data.map(value => value *= Math.pow(10, i)); // *10 & *100

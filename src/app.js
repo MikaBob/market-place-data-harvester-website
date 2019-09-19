@@ -7,11 +7,12 @@ import { loadUser } from './redux/actions/authActions';   // redux workflow: Act
 import store        from './redux/store';
 
 import Header   from "./components/header.component";
-import Search   from "./components/search.component";
-import Item     from "./components/item.component";
 import Footer   from "./components/footer.component";
-import Login    from "./components/login.component";
-import Nope     from "./components/nope.component";
+import Loading  from "./components/loading.component";
+import Search   from "./containers/search.page";
+import Item     from "./containers/item.page";
+import Login    from "./containers/login.page";
+import Nope     from "./containers/nope.page";
 
 class App extends Component {
         
@@ -31,7 +32,7 @@ class App extends Component {
      */
 
     render() {
-        const { isAuthenticated, user } = this.props.auth;
+        const { isAuthenticated, user, isLoading } = this.props.auth;
         return (
                 <BrowserRouter>
                     <div className="body">
@@ -45,11 +46,17 @@ class App extends Component {
                                 </Switch>
                                 <Footer />
                             </Fragment>
-                        ) :(
-                            <Fragment>
-                                <Route component={Login} />
-                            </Fragment>
-                        )}
+                            ) : 
+                                isLoading ? (
+                                    <Fragment>
+                                        <Loading />
+                                    </Fragment>
+                                ) : (
+                                    <Fragment>
+                                        <Route component={Login} />
+                                    </Fragment>
+                                )
+                        }
                     </div>
                 </BrowserRouter>
             );

@@ -11,3 +11,4 @@
 # images
 !/public/images/items/1457.png
 /public/images/items/*
+/public/images/loading/*

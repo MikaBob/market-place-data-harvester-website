@@ -52,7 +52,7 @@ export default class Search extends Component {
         return (
                 <div className="row border border-light py-2">
                     <div className="container-fluid form-group mx-0 px-0">
-                        <input type="search" onChange={this.onChangeSearch} value={this.state.itemName} className="form-control" placeholder="Search for an item"/>
+                        <input type="search" onChange={this.onChangeSearch} value={this.state.itemName} className="form-control" placeholder="Search for an item (at least 3 characters)"/>
                     </div>
                     <table className="table">
                         <thead className="thead-light">

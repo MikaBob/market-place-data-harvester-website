@@ -23,6 +23,8 @@ export default function (state = initialState, action) {
                 isLoading: true
             };
         case USER_LOADED:
+            if(state.token)
+                axios.defaults.headers.common['x-auth-token'] =  state.token;
             return {
                 ...state,
                 isAuthenticated: true,
