@@ -1,8 +1,69 @@
-body {
-    margin: 0;
-    padidng: 0;
+.body {
+    margin: auto;
+    max-width: 1280px;
 }
 
-.menu.navbar > .navbar-expand-lg {
-    width: 100%;
+.datepickers-for-chart .react-datepicker-wrapper {
+    width: 75%;
+}
+
+.loading-spin {
+    animation: spin-animation 4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+@-moz-keyframes spin-animation {
+    0%, 100% {
+        animation-timing-function: cubic-bezier(0.5, 0, 1, 0.5);
+    }
+    0% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(500deg);
+        animation-timing-function: cubic-bezier(0, 0.5, 0.5, 1);
+    }
+    100% {
+        transform: rotate(-720deg);
+    }
+}
+
+/*
+    xs <  576
+    sm >= 576
+    md >= 768
+    lg >= 992
+    xl >= 1200
+*/
+
+/* For sm and less  */
+@media (max-width: 576px) {
+    body * { 
+        font-size: 0.8rem !important;
+    }
+    .body {
+        padding: 0 !important;
+    }
+    .login-form {
+        width: 100%
+    }
+}
+
+/* For sm and more  */
+@media (min-width: 576px) {
+    .login-form {
+        width: 50%
+    }
+}
+
+/* For md and more  */
+@media (min-width: 768px) {
+    .border-md-right {
+        border-right: 1px solid;
+    }
+}
+
+/* For lg and more  */
+@media (min-width: 992px) {
+    .login-form {
+        width: 33%
+    }
 }
