@@ -5,6 +5,7 @@ import { returnErrors } from './errorActions';
 import {
     USER_LOADED,
     USER_LOADING,
+    USER_UPDATED,
     AUTH_ERROR,
     LOGIN_SUCCESS,
     LOGIN_FAIL,
@@ -17,7 +18,6 @@ import {
 export const loadUser = () => (dispatch, getState) => {
     // User loading
     dispatch({type: USER_LOADING});
-
     axios
         .get(process.env.API_URL + '/user', tokenConfig(getState))
         .then(res =>
@@ -27,7 +27,9 @@ export const loadUser = () => (dispatch, getState) => {
             })
         )
         .catch(err => {
-            dispatch(returnErrors(err.response.data, err.response.status));
+            console.log(err);
+            if(err.response)
+                dispatch(returnErrors(err.response.data, err.response.status));
             dispatch({type: AUTH_ERROR});
         });
 };
@@ -44,19 +46,20 @@ export const login = ({ login, password }) => dispatch => {
     // Request body
     const body = JSON.stringify({login, password});
 
-    axios
+    return axios
         .post(process.env.API_URL + '/login', body, config)
-        .then(res =>
-            dispatch({
-                type: LOGIN_SUCCESS,
-                payload: res.data
-            })
+        .then(res => {
+                dispatch({
+                    type: LOGIN_SUCCESS,
+                    payload: res.data
+                });
+            }
         )
         .catch(err => {
-            console.log(err);
             if(err)
                 dispatch(returnErrors(err.response.data, err.response.status, LOGIN_FAIL));
             dispatch({type: LOGIN_FAIL});
+            return err;
         });
 };
 
@@ -83,4 +86,36 @@ export const tokenConfig = getState => {
     }
 
     return config;
+};
+
+export const updateUser = ( user ) => dispatch => {
+    axios
+        .post(process.env.API_URL + '/user/update', JSON.stringify(user), {headers: {'Content-Type': 'application/json'}})
+        .then(res => {
+                dispatch({
+                    type: USER_UPDATED,
+                    payload: res.data
+                });
+            }
+        )
+        .catch(err => {
+            if(err)
+                dispatch(returnErrors(err.response.data, err.response.status));
+        });
+};
+
+
+export const changeUserPassword = ( password ) => dispatch => {
+    return axios
+        .post(process.env.API_URL + '/user/pwd', JSON.stringify({password: password}), {headers: {'Content-Type': 'application/json'}})
+        .then(res => {
+                dispatch(returnErrors(res.data, 200));
+                return res.data;
+            }
+        )
+        .catch(err => {
+            if(err)
+                dispatch(returnErrors(err.response.data, err.response.status));
+            return err.response.data;
+        });
 };

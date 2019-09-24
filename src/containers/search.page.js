@@ -5,13 +5,12 @@ import axios                from 'axios';
 
 const ItemRow = props => (
             <tr>
-                <td>{props.item.label}</td>
-                <td>{props.item.lvl}</td>
+                <td>
+                    <Link to={"/item/" + props.item.itemGID}>{props.item.label}</Link>
+                </td>
+                <td className="d-none d-md-block">{props.item.lvl}</td>
                 <td>{props.item.type}</td>
                 <td>{props.item.category}</td>
-                <td>
-                    <Link to={"/item/" + props.item.itemGID}>See prices</Link>
-                </td>
             </tr>
             );
 
@@ -23,15 +22,15 @@ export default class Search extends Component {
         this.onChangeSearch = this.onChangeSearch.bind(this); // binding "this" to the class. Otherwise "this" won't be defined inside the function
 
         this.state = {
-            itemName: '',
+            searchString: '',
             items: []
         };
     }
 
     onChangeSearch(event) {
-        this.setState({itemName: event.target.value}, () => {
-            if (this.state.itemName.length > 2) {
-                axios.get(process.env.API_URL + '/item/list', {params: {itemName: this.state.itemName}})
+        this.setState({searchString: event.target.value}, () => {
+            if (this.state.searchString.length > 2) {
+                axios.get(process.env.API_URL + '/item/list', {params: {filter: this.state.searchString}})
                         .then(response => {
                             this.setState({items: response.data});
                         })
@@ -50,18 +49,17 @@ export default class Search extends Component {
 
     render() {
         return (
-                <div className="row border border-light py-2">
+                <div className="row border border-light">
                     <div className="container-fluid form-group mx-0 px-0">
-                        <input type="search" onChange={this.onChangeSearch} value={this.state.itemName} className="form-control" placeholder="Search for an item (at least 3 characters)"/>
+                        <input type="search" onChange={this.onChangeSearch} value={this.state.searchString} className="form-control" placeholder="Search for an item (at least 3 characters)"/>
                     </div>
-                    <table className="table">
+                    <table className="table table-striped table-bordered text-center">
                         <thead className="thead-light">
                             <tr>
                                 <th>Label</th>
-                                <th>Level</th>
+                                <th className="d-none d-md-block">Level</th>
                                 <th>Type</th>
                                 <th>Category</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>

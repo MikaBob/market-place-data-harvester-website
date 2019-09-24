@@ -2,6 +2,12 @@ const jwt       = require('jsonwebtoken');
 const dotenv    = require('dotenv').config({ path: '../../.env' });
 
 function auth(req, res, next) {
+
+    // Uncomment the following lines to deactivate authentification
+    /*
+    next();
+    return;
+    */
     const token = req.header('x-auth-token');
 
     // Simple validation

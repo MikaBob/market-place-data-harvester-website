@@ -14,8 +14,8 @@ class Header extends Component {
     
     render() {
         return (
-            <div className="row menu navbar bg-primary rounded-bottom mb-3">
-                <nav className="navbar navbar-expand-lg w-100 navbar-light bg-primary">
+            <div className="row menu navbar bg-primary rounded-bottom mb-3 py-0 py-md-1">
+                <nav className="navbar navbar-expand-lg w-100 navbar-light bg-primary py-0 py-md-1">
                     <Link to="/" className="navbar-brand">MPDH</Link>
                     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
@@ -32,7 +32,7 @@ class Header extends Component {
                         </ul>
                         <ul className="nav navbar-nav navbar-right">
                             <li>
-                                <Link to="/" className="nav-link">Profile</Link>
+                                <Link to="/profile" className="nav-link">My profile</Link>
                             </li>
                             <li>
                                 <Link to="/" onClick={this.props.logout} className="nav-link">Logout</Link>

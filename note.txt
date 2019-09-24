@@ -18,8 +18,7 @@ installer mongodb
 			db.item.insert({ "itemGID" : 1457, "label" : "Ailes de Scarafeuille Rouge ", "type" : " Ressource ", "category" : " Aile ", "lvl" : 38 }); 
 			db.price.insert({ "itemGID" : 307, "timestamp" : ISODate("2019-07-17T20:30:19.893Z"), "price_1" : 285, "price_10" : 3593, "price_100" : 34899, "price_avg" : 222 });
 			db.price.insert({ "itemGID" : 1457, "timestamp" : ISODate("2019-07-18T14:50:40.948Z"), "price_1" : 298, "price_10" : 3699, "price_100" : 47985, "price_avg" : 435 });
-			db.user.insert({ "login" : "admin", "password" : "admin" });
-			db.user.insert({ "login" : "user", "password" : "a" });
+			db.user.insert({ "login" : "admin", "password" : ""$2a$10$AQmR3iDnxhCrMJ83YfWah.bMJK2KQexlzltIQmrbfWLrVwRDcW4Wq", "register_date" : ISODate("2019-09-20T15:50:23.076Z"), "favorites" : [ ]});
 
 
 Présentation du site web:

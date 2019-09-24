@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
+import { connect }          from 'react-redux';
 import axios                from 'axios';
 import { Line }             from 'react-chartjs-2';
 import DatePicker           from "react-datepicker";
 import { format, isAfter, subDays } from 'date-fns'
+import PropTypes            from 'prop-types';
+
+import { updateUser }   from '../redux/actions/authActions'
 
 import "react-datepicker/dist/react-datepicker.css";
+
 
 const GRAPH_COLORS = [
     'rgba(191, 213, 0, 0.5)',
@@ -13,16 +18,17 @@ const GRAPH_COLORS = [
     'rgba(255, 153, 0, 0.5)'
 ];
 
-export default class Item extends Component {
+class Item extends Component {
 
     constructor(props) {
         super(props);
 
-        this.ChangeScale = this.ChangeScale.bind(this);
-        this.ChangeStartDate = this.ChangeStartDate.bind(this);
-        this.ChangeEndDate = this.ChangeEndDate.bind(this);
-        this.setDates = this.setDates.bind(this);
-        this.putToScale = this.putToScale.bind(this);
+        this.ChangeScale        = this.ChangeScale.bind(this);
+        this.ChangeStartDate    = this.ChangeStartDate.bind(this);
+        this.ChangeEndDate      = this.ChangeEndDate.bind(this);
+        this.setDates           = this.setDates.bind(this);
+        this.putToScale         = this.putToScale.bind(this);
+        this.addOrRemoveToFavorite = this.addOrRemoveToFavorite.bind(this);
 
 
         var today = new Date();
@@ -46,17 +52,22 @@ export default class Item extends Component {
             activeButtonIndex: 2,
         };
     }
+    
+    static propTypes = {
+        updateUser: PropTypes.func.isRequired,
+    };
 
     componentDidMount() {
         // Item description
-        axios.get(process.env.API_URL + '/item/' + this.props.match.params.itemGID)
+        axios.get(process.env.API_URL + '/item/', {params: {itemsGID: [this.props.match.params.itemGID]}})
                 .then(response => {
+                    let item = response.data[0];
                     this.setState({
-                        itemGID: response.data.itemGID,
-                        lvl: response.data.lvl,
-                        label: response.data.label,
-                        type: response.data.type,
-                        category: response.data.category,
+                        itemGID: item.itemGID,
+                        lvl: item.lvl,
+                        label: item.label,
+                        type: item.type,
+                        category: item.category,
                     }, () => {
                         this.refreshChart();
                     });
@@ -158,14 +169,31 @@ export default class Item extends Component {
         // update values
         this.setState({chartData: updatedChartData});
     }
+    
+    addOrRemoveToFavorite(){
+        
+        let favorites = this.props.user.favorites || {items:[]};
+        let itemGid = this.state.itemGID.toString();
+        
+        let indexItemInFavorite = favorites.items.indexOf(itemGid);
+        if(indexItemInFavorite !== -1)
+            favorites.items.splice(indexItemInFavorite, 1);
+        else
+            favorites.items.push(itemGid);
+        
+        let newUser = {...this.props.user, favorites: favorites};
+        this.props.updateUser(newUser);
+    }
 
     render() {
+        const isInFavorites = this.props.user.favorites.items.indexOf(this.state.itemGID.toString()) !== -1 ? true:false;
         return (
-                <div className="row border border-light py-2">
+                <div className="row border border-light">
                     <div className="col-12 col-lg-3">
                         <table className="table table-bordered">
                             <tbody>
-                                <tr><td colSpan="2"><img src={`/public/images/items/${this.state.itemGID}.png`} className="img-fluid center center-block text-center" alt={this.state.itemGID + ".png"}></img></td></tr>
+                                <tr><td colSpan="2" className="text-center"><img src={`/public/images/items/${this.state.itemGID}.png`} className="img-fluid" alt={this.state.itemGID + ".png"}></img></td></tr>
+                                <tr><td colSpan="2" className="p-0"><button className="btn btn-primary w-100 rounded-0" onClick={this.addOrRemoveToFavorite}>{isInFavorites ? ("Remove from my favorites"):("Add to my favorites")}</button></td></tr>
                                 <tr><td>Label</td><td>{this.state.label}</td></tr>
                                 <tr><td>Level</td><td>{this.state.lvl}</td></tr>
                                 <tr><td>Type</td><td>{this.state.type}</td></tr>
@@ -245,3 +273,9 @@ export default class Item extends Component {
                 );
     }
 }
+
+const mapStateToProps = state => ({
+    user: state.auth.user
+});
+
+export default connect(mapStateToProps, { updateUser })(Item);

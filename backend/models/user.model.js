@@ -9,11 +9,16 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     register_date: {
         type: Date,
         default: Date.now
+    },
+    favorites: {
+        type: Map,
+        of: [String]
     }
 });
 

@@ -13,6 +13,7 @@ import Search   from "./containers/search.page";
 import Item     from "./containers/item.page";
 import Login    from "./containers/login.page";
 import Nope     from "./containers/nope.page";
+import Profile   from "./containers/profile.page";
 
 class App extends Component {
         
@@ -32,16 +33,17 @@ class App extends Component {
      */
 
     render() {
-        const { isAuthenticated, user, isLoading } = this.props.auth;
+        const { isAuthenticated, isLoading } = this.props.auth;
         return (
                 <BrowserRouter>
-                    <div className="body">
+                    <div className="body container-fluid">
                         {isAuthenticated ?(
                             <Fragment>
                                 <Header />
                                 <Switch>
                                     <Route path={["/search", "/"]} exact component={Search} />
                                     <Route path="/item/:itemGID" exact component={Item} />
+                                    <Route path="/profile" exact component={Profile} />
                                     <Route component={Nope} />
                                 </Switch>
                                 <Footer />
@@ -64,7 +66,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => ({
-  auth: state.auth
+    auth: state.auth
 });
 
 export default connect(mapStateToProps, null)(App);

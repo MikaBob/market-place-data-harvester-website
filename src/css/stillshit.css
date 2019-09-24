@@ -1,14 +1,11 @@
 .body {
     margin: auto;
-    padding: 0;
-    max-width: 1200px;
+    max-width: 1280px;
 }
-
 
 .datepickers-for-chart .react-datepicker-wrapper {
     width: 75%;
 }
-
 
 .loading-spin {
     animation: spin-animation 4s cubic-bezier(0, 0.2, 0.8, 1) infinite;
@@ -39,15 +36,28 @@
 
 /* For sm and less  */
 @media (max-width: 576px) {
+    body * { 
+        font-size: 0.8rem !important;
+    }
+    .body {
+        padding: 0 !important;
+    }
     .login-form {
         width: 100%
     }
 }
 
-/* For md and more  */
+/* For sm and more  */
 @media (min-width: 576px) {
     .login-form {
         width: 50%
+    }
+}
+
+/* For md and more  */
+@media (min-width: 768px) {
+    .border-md-right {
+        border-right: 1px solid;
     }
 }
 

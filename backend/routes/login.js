@@ -18,7 +18,7 @@ router.post('/', (req, res) => {
     }
 
     // Check for existing user
-    User.findOne({login})
+    User.findOne({login}, '+password')
         .then(user => {
             if (!user)
                 return res.status(400).json({msg: 'Invalid credentials'});

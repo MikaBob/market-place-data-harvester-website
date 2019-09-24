@@ -2,6 +2,7 @@ import axios from 'axios';
 import {
     USER_LOADED,
     USER_LOADING,
+    USER_UPDATED,
     AUTH_ERROR,
     LOGIN_SUCCESS,
     LOGIN_FAIL,
@@ -29,6 +30,11 @@ export default function (state = initialState, action) {
                 ...state,
                 isAuthenticated: true,
                 isLoading: false,
+                user: action.payload
+            };
+        case USER_UPDATED:
+            return {
+                ...state,
                 user: action.payload
             };
         case LOGIN_SUCCESS:

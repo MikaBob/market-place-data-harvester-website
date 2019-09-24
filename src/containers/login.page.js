@@ -3,7 +3,7 @@ import { withRouter }       from "react-router-dom";
 import { connect }          from 'react-redux';
 import PropTypes            from 'prop-types';
 
-import { login }    from '../redux/actions/authActions';
+import { login, loadUser }    from '../redux/actions/authActions';
 
 class Login extends Component {
     
@@ -59,7 +59,11 @@ class Login extends Component {
         };
 
         // Attempt to login
-        this.props.login(user);
+        this.props.login(user)
+        .then((err) => {
+            if(!err)
+                this.props.loadUser();
+        });
     }
     
     forgottenPassword(){
@@ -119,4 +123,4 @@ const mapStateToProps = state => ({
     error: state.error
 });
 
-export default connect(mapStateToProps, {login})(withRouter(Login));
+export default connect(mapStateToProps, {login, loadUser})(withRouter(Login));
