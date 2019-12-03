@@ -2,11 +2,16 @@ const express   = require('express');   // excellent router
 const cors      = require('cors');      // Cross-Origin Ressource Sharing (pour communiqué entre seveur (frontend/backend))
 const mongoose  = require('mongoose');  // On ne le présente plus
 const fs        = require('fs');        // file system access simplified
-const dotenv    = require('dotenv').config({ path: '../.env' }); // environement variable (shared with frontend)
+const dotenv    = require('dotenv').config({ path: __dirname+'/../.env' }); // environement variable (shared with frontend)
 
+ 
+if (dotenv.error) {
+  console.log(dotenv.error);
+}
+ 
 const PORT = 8090;
 const DB_HOST = process.env.MONGO_URL;
-const PUBLIC_URL = "../"+process.env.PUBLIC_URL+"public/";
+const PUBLIC_URL = ".."+process.env.PUBLIC_URL+"public/";
 
 const app = express();
 
@@ -29,6 +34,7 @@ connection.once('open', () => {
 app.use('/item', require('./routes/item'));
 app.use('/user', require('./routes/user'));
 app.use('/prices', require('./routes/prices'));
+app.use('/purchase', require('./routes/purchase'));
 app.use('/login', require('./routes/login'));
 
 

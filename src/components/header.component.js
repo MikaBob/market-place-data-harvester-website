@@ -27,7 +27,7 @@ class Header extends Component {
                                 <Link to="/search" className="nav-link">Search</Link>
                             </li>
                             <li className="nav-item">
-                                <Link to="/search" className="nav-link">Top List</Link>
+                                <Link to="/purchase" className="nav-link">My purchases</Link>
                             </li>
                         </ul>
                         <ul className="nav navbar-nav navbar-right">

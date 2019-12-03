@@ -9,7 +9,7 @@ const auth      = require('../authentification');
 let User = require('../models/user.model');
 
 router.post('/', (req, res) => {
-    console.log("POST /login \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    console.log("\nPOST /login \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
     const {login, password} = req.body;
 
     // Simple validation

@@ -9,10 +9,9 @@ let Price   = require('../models/price.model');
 
 /* 18/09/19	Pour le moment on oublie la partie authentification de l'utilisateur */
 router.post('/:itemGID', (req, res) => {
+    console.log("\nPOST /prices \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+
     const itemGID = req.params.itemGID;
-
-    console.log("POST /prices \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
-
     const { price_1, price_10, price_100, price_avg } = req.body;
 
     console.log('price_1:   ' + price_1);

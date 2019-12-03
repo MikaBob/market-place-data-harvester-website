@@ -6,20 +6,23 @@ let Price   = require('../models/price.model');
 
 
 router.get('/list', auth, (req, res) => {
-    console.log("GET /item/list \nparams:", req.params, "\nquery:", req.query);
+    console.log("\nGET /item/list \nparams:", req.params, "\nquery:", req.query);
 
-    if(typeof req.query.filter === 'undefined' || req.query.filter.length < 2 )
-        res.status(400).json('Search string must be at least 3 characters long');
+    if(typeof req.query.label === 'undefined' || req.query.label.length < 2 )
+        res.status(400).json('Search string must be at least 2 characters long');
 
-    var filter = {"label": {"$regex": req.query.filter, "$options": "i"}};
+    var limit = (req.query.limit === 'undefined')?-1 : parseInt(req.query.limit);
+
+    var filter = {"label": {"$regex": req.query.label, "$options": "i"}};
     Item.find(filter)
+        .limit(limit)
         .then(items => res.json(items))
         .catch(err => res.status(400).json('Error: ' + err));
 });
 
 
 router.get('/', auth, (req, res) => {
-    console.log("GET /item/ \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    console.log("\nGET /item/ \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
     const itemsGID = req.query.itemsGID;
 
     if(!itemsGID)
@@ -31,7 +34,7 @@ router.get('/', auth, (req, res) => {
 });
 
 router.get('/:itemGID/prices', auth, (req, res) => {
-    console.log("GET /item/:itemGID/prices/ \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    console.log("\nGET /item/:itemGID/prices/ \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
     var itemGID = req.params.itemGID;       // req.params pour un parameter depuis l'URL
     var startTime = req.query.startTime;    // req.query pour un parameter depuis la requête
     var endTime = req.query.endTime;

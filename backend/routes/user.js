@@ -10,7 +10,7 @@ let User = require('../models/user.model');
 
 // Get User
 router.get('/', auth, (req, res) => {
-    console.log("GET /user \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    console.log("\nGET /user \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
     User.findById(req.user.id)
             .select('-password')
             .then(user => res.json(user));
@@ -18,7 +18,7 @@ router.get('/', auth, (req, res) => {
 
 // Create User
 router.post('/', auth, (req, res) => {
-    console.log("POST /user \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    console.log("\nPOST /user \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
     const { login, password } = req.body;
 
     // Simple validation
@@ -68,7 +68,7 @@ router.post('/', auth, (req, res) => {
 
 // Update user
 router.post('/update', auth, (req, res) => {
-    console.log("POST /user/update \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    console.log("\nPOST /user/update \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
     const { favorites } = req.body;
     
     User.findById(req.user.id, (err, user) => {
@@ -90,7 +90,7 @@ router.post('/update', auth, (req, res) => {
 
 // Update password
 router.post('/pwd', auth, (req, res) => {
-    console.log("POST /user/pwd \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    console.log("\nPOST /user/pwd \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
     const { password } = req.body;
     
     User.findById(req.user.id, (err, user) => {
