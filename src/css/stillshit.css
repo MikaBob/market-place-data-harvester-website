@@ -1,6 +1,43 @@
+/* AutoComplete */
+div.suggestions {
+    left: 1px; 
+    top: 95px; 
+    min-width: 226.667px; 
+    border-radius: 3px; 
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px; 
+    background: rgba(255, 255, 255, 0.9) none repeat scroll 0% 0%; 
+    padding: 2px 0px; 
+    font-size: 90%; 
+    position: fixed; 
+    overflow: auto; 
+    max-height: 50%;
+}
+div.suggestions > div {
+    background: white none repeat scroll 0% 0%;
+}
+div.suggestions > div.suggestion-active {
+    background-color: #f1f1f1;
+}
+
+/* Default input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+    -moz-appearance:textfield; /* Firefox */
+}
+
 .body {
     margin: auto;
     max-width: 1280px;
+}
+
+.image-thumbnail{
+    max-height: 2rem;
 }
 
 .datepickers-for-chart .react-datepicker-wrapper {

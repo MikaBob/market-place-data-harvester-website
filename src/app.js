@@ -13,7 +13,8 @@ import Search   from "./containers/search.page";
 import Item     from "./containers/item.page";
 import Login    from "./containers/login.page";
 import Nope     from "./containers/nope.page";
-import Profile   from "./containers/profile.page";
+import Profile  from "./containers/profile.page";
+import Purchase from "./containers/purchase.page";
 
 class App extends Component {
         
@@ -42,6 +43,7 @@ class App extends Component {
                                 <Header />
                                 <Switch>
                                     <Route path={["/search", "/"]} exact component={Search} />
+                                    <Route path="/purchase" exact component={Purchase} />
                                     <Route path="/item/:itemGID" exact component={Item} />
                                     <Route path="/profile" exact component={Profile} />
                                     <Route component={Nope} />

@@ -140,9 +140,9 @@ class Item extends Component {
     }
 
     setDates(buttonIndex, startDate, endDate) {
-        buttonIndex = buttonIndex == null ? -1 : buttonIndex;
-        startDate = startDate == null ? this.state.startDate : startDate;
-        endDate = endDate == null ? this.state.endDate : endDate;
+        buttonIndex = buttonIndex === null ? -1 : buttonIndex;
+        startDate = startDate === null ? this.state.startDate : startDate;
+        endDate = endDate === null ? this.state.endDate : endDate;
 
         this.setState({activeButtonIndex: buttonIndex});
         this.setState({startDate: startDate, endDate: endDate}, () => {
