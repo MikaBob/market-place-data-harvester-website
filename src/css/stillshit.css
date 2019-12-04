@@ -1,19 +1,22 @@
 /* AutoComplete */
+.autocomplete-suggestions{
+    position: absolute;
+    z-index: 1000;
+    margin-top: 2px;
+}
 div.suggestions {
-    left: 1px; 
-    top: 95px; 
-    min-width: 226.667px; 
-    border-radius: 3px; 
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px; 
-    background: rgba(255, 255, 255, 0.9) none repeat scroll 0% 0%; 
-    padding: 2px 0px; 
-    font-size: 90%; 
-    position: fixed; 
-    overflow: auto; 
+    min-width: 227px;
     max-height: 50%;
+    border-radius: 3px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px;
+    background: rgba(255, 255, 255, 0.9) none repeat scroll 0% 0%;
+    font-size: 90%;
+    overflow: auto;
 }
 div.suggestions > div {
     background: white none repeat scroll 0% 0%;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 div.suggestions > div.suggestion-active {
     background-color: #f1f1f1;
@@ -28,7 +31,7 @@ input::-webkit-inner-spin-button {
 }
 
 input[type=number] {
-    -moz-appearance:textfield; /* Firefox */
+    -moz-appearance: textfield; /* Firefox */
 }
 
 .body {
@@ -39,7 +42,9 @@ input[type=number] {
 .image-thumbnail{
     max-height: 2rem;
 }
-
+.div-contenteditable {
+    min-height: 2rem;
+}
 .datepickers-for-chart .react-datepicker-wrapper {
     width: 75%;
 }
