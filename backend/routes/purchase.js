@@ -39,6 +39,14 @@ router.post('/add', auth, (req, res) => {
 
     const { label, price_bought, date_bought, itemGID } = req.body.params;
 
+    if( label === null || price_bought === null || date_bought === null ||
+        label === '' || price_bought === '' || date_bought === '' ||
+        typeof label === 'undefined' || typeof price_bought === 'undefined' || typeof date_bought === 'undefined' || 
+        isNaN(price_bought) || isNaN((new Date(date_bought)).getTime()))
+    {
+        return res.status(400).json({ msg: 'Could not add purchase: Invalid value(s)' });
+    }
+
     Item.findOne({ itemGID })
     .then(item => {
 

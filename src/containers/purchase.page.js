@@ -17,7 +17,7 @@ class ArchiveRow extends React.Component {
     }
 
     render() {
-        const profit = this.props.purchase.price_bought - this.props.purchase.price_sold;
+        const profit = this.props.purchase.price_sold - this.props.purchase.price_bought;
         return (
             <tr>
                 <td>
@@ -42,7 +42,7 @@ class ArchiveRow extends React.Component {
                     { differenceInCalendarDays(new Date(this.props.purchase.date_sold), new Date(this.props.purchase.date_bought)) } days
                 </td>
                 <td>
-                    <button onClick={(e) => {this.props.onDeletePurchase(this.props.purchase);}} className='btn btn-secondary border border-secondary'>Delete</button>
+                    <button onClick={(e) => {this.props.onDeletePurchase(this.props.purchase);}} className='btn btn-sm btn-secondary border border-secondary'>Delete</button>
                 </td>
             </tr>
         );
@@ -84,48 +84,49 @@ class PurchaseRow extends React.Component {
                 <td>
                     <ContentEditable
                         html={this.props.purchase.label}
-                        disabled={false}
-                        onKeyPress={this.disableEnter}
-                        onChange={(e) => {this.props.purchase.label = e.target.value;}}
+                        className="div-contenteditable"
+                        onKeyPress={(e) => {e.target.blur(); this.disableEnter();}}
+                        onChange={(e) => {this.props.purchase.label = e.target.value.replace(/(<([^>]+)>)/ig,"");}}
                         onBlur={(e) => {this.props.purchase.label = (this.props.onEditPurchase(this.props.purchase, this.state.purchaseBeforeEditing)).label;}}
                     />
                 </td>
                 <td>
                     <ContentEditable
                         html={this.props.purchase.price_bought.toString()}
-                        disabled={false}
-                        onKeyPress={this.disableEnter}
-                        onChange={(e) => { this.props.purchase.price_bought = e.target.value;}}
+                        className="div-contenteditable"
+                        onKeyPress={(e) => {e.target.blur(); this.disableEnter();}}
+                        onChange={(e) => { this.props.purchase.price_bought = e.target.value.replace(/(<([^>]+)>|-)/ig,"");}}
                         onBlur={(e) => {this.props.purchase.price_bought = (this.props.onEditPurchase(this.props.purchase, this.state.purchaseBeforeEditing)).price_bought;}}
                     />
                 </td>
                 <td>
                     <ContentEditable
-                        html={typeof this.props.purchase.price_sold !== 'undefined' ? this.props.purchase.price_sold.toString(): '-'}
-                        disabled={false}
-                        onKeyPress={this.disableEnter}
-                        onChange={(e) => { this.props.purchase.price_sold = e.target.value;}}
-                        onBlur={(e) => {this.props.purchase.price_sold = (this.props.onEditPurchase(this.props.purchase, this.state.purchaseBeforeEditing)).price_sold;}}
+                        html={typeof this.props.purchase.price_sold !== 'undefined' ? this.props.purchase.price_sold.toString(): ''}
+                        onKeyPress={(e) => {e.target.blur(); this.disableEnter();}}
+                        className="div-contenteditable"
+                        onChange={(e) => { this.props.purchase.price_sold = e.target.value.replace(/(<([^>]+)>|-)/ig,"");}}
+                        onBlur={() => {this.props.purchase.price_sold = (this.props.onEditPurchase(this.props.purchase, this.state.purchaseBeforeEditing)).price_sold;}}
                     />
                 </td>
                 <td>
                     <ContentEditable
                         html={format(new Date(this.props.purchase.date_bought), 'dd/MM')}
-                        disabled={false}
-                        onKeyPress={this.disableEnter}
-                        onChange={(e) => { this.props.purchase.date_bought = e.target.value;}}
+                        className="div-contenteditable"
+                        onKeyPress={(e) => {e.target.blur(); this.disableEnter();}}
+                        onChange={(e) => { this.props.purchase.date_bought = e.target.value.replace(/(<([^>]+)>|-)/ig,"");}}
                         onBlur={(e) => {
-                            // parse string to Date
-                            this.props.purchase.date_bought = new Date((new Date()).getFullYear(), this.props.purchase.date_bought.split("/")[1]-1, this.props.purchase.date_bought.split("/")[0]);
-                            // validate edit
-                            this.props.purchase.date_bought = (this.props.onEditPurchase(this.props.purchase, this.state.purchaseBeforeEditing)).date_bought;
+                            if(this.props.purchase.date_bought !== this.state.purchaseBeforeEditing.date_bought){
+                                // parse string to Date
+                                this.props.purchase.date_bought = new Date((new Date()).getFullYear(), this.props.purchase.date_bought.split("/")[1]-1, this.props.purchase.date_bought.split("/")[0]);
+                                // validate edit
+                                this.props.purchase.date_bought = (this.props.onEditPurchase(this.props.purchase, this.state.purchaseBeforeEditing)).date_bought;
+                            }
                         }}
                     />
                 </td>
-                <td>{this.props.purchase.date_sold ? format(new Date(this.props.purchase.date_sold), 'dd MMM')+" ("+differenceInCalendarDays(new Date(this.props.purchase.date_bought), new Date(this.props.purchase.date_sold))+")" : "-"}</td>
                 <td>
-                    <button onClick={(e) => {this.props.onValidatePurchase(this.props.purchase)}} className='mr-1 btn btn-success border border-secondary'>Validate</button>
-                    <button onClick={(e) => {this.props.onDeletePurchase(this.props.purchase)}} className='btn btn-secondary border border-secondary'>Delete</button>
+                    <button onClick={() => {this.props.onValidatePurchase(this.props.purchase)}} className='btn btn-sm btn-success mr-1 border border-secondary'>Validate</button>
+                    <button onClick={() => {this.props.onDeletePurchase(this.props.purchase)}} className='btn btn-sm btn-secondary border border-secondary'>Delete</button>
                 </td>
             </tr>
         );
@@ -255,11 +256,11 @@ export default class Purchase extends Component {
     }
     
     isPurchaseValid(purchase){
-        setTimeout(() => this.setState({msg:null}), 2000);
+        setTimeout(() => this.setState({msg:''}), 3000);
         if(typeof purchase.label === 'undefined' || purchase.label === '') {
             this.setState({msg:'"Label" can not be empty'});
             return false;
-        } else if(purchase.price_bought === 'undefined' || isNaN(purchase.price_bought)) {
+        } else if(purchase.price_bought === 'undefined' || purchase.price_bought === '' || isNaN(purchase.price_bought)) {
             this.setState({msg:'"Price bought" is not a valid number'});
             return false;
         } else if(typeof purchase.date_bought !== 'undefined' && (purchase.date_bought === null || !isValid(new Date(purchase.date_bought)))) {
@@ -318,24 +319,24 @@ export default class Purchase extends Component {
     render() {
         return (
             <div className="row border border-light">
-                <div className="container-fluid form-group mx-0 px-0">
+                <div className="container-fluid mx-0 px-0">
                     <form className='form-inline mb-2' onSubmit={this.addPurchase}>
-                            <div className='form-group mr-1'>
+                            <div className='form-group col-sm-12 col-md-6 col-lg-4'>
                                 <Autocomplete id={'labelSearch'} ref="labeSearch"  placeholder='Label' onChangeCallback={this.updateSuggestions} suggestions={this.state.items} />
                             </div>
-                            <div className='form-group mr-1'>
+                            <div className='form-group col-sm-12 col-md-6 col-lg-4 mt-sm-1 mt-md-0'>
                                 <input
                                     type='text'
                                     name='price_bought'
                                     id='price_bought'
                                     placeholder='Price'
-                                    className='form-control'
+                                    className='form-control w-100'
                                     onChange={(e) => {let newPurchase = this.state.newPurchase; newPurchase.price_bought= e.target.value; this.setState({newPurchase: newPurchase})}}
                                     value={this.state.price}
                                     />
                             </div>
-                            <div className='form-group mr-1'>
-                                <button className='btn btn-primary border border-secondary'>
+                            <div className='form-group col-sm-12 col-md-6 col-lg-4 mt-sm-1 mt-lg-0'>
+                                <button className='btn btn-primary border border-secondary w-100'>
                                     Add purchase to my list
                                 </button>
                             </div>
@@ -348,41 +349,39 @@ export default class Purchase extends Component {
                             </button>
                         </div>
                     ):null}
-                    <table className='table table-sm table-striped table-bordered text-center'>
-                        <thead className='thead-light'>
-                            <tr>
-                                <th>Img.</th>
-                                <th>Item</th>
-                                <th>Price bought</th>
-                                <th>Price sold</th>
-                                <th>Date bought</th>
-                                <th>Date sold</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            { this.refreshPurchaseList() }
-                        </tbody>
-                    </table>
-
-
-                    <table className='table table-sm table-striped table-bordered text-center'>
-                        <thead className='thead-light'>
-                            <tr>
-                                <th>Img.</th>
-                                <th>Item</th>
-                                <th>Profit</th>
-                                <th>Interval</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            { this.refreshArchiveList() }
-                        </tbody>
-                    </table>
-
-
                 </div>
+                <h3>Current items</h3>
+                <table className='table table-sm table-hover table-striped table-bordered text-center'>
+                    <thead className='thead-light'>
+                        <tr>
+                            <th>Img.</th>
+                            <th>Item</th>
+                            <th>Price bought</th>
+                            <th>Price sold</th>
+                            <th>Date bought</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { this.refreshPurchaseList() }
+                    </tbody>
+                </table>
+
+                <h3>Archive</h3>
+                <table className='table table-sm table-hover table-striped table-bordered text-center'>
+                    <thead className='thead-light'>
+                        <tr>
+                            <th>Img.</th>
+                            <th>Item</th>
+                            <th>Profit</th>
+                            <th>Interval</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { this.refreshArchiveList() }
+                    </tbody>
+                </table>
             </div>
             );
     }

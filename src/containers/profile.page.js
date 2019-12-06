@@ -76,7 +76,7 @@ class Profile extends Component {
     render() {
         const dateRegistration = new Date(this.props.user.register_date);
         return (
-                <div className="row border border-light">
+                <div className="row border border-light border-top-0">
                     <div className="container-fluid px-0 mx-0">
                         <div className="row">
                             <div className="col-md-6 border-md-right border-primary">
@@ -108,8 +108,8 @@ class Profile extends Component {
                             </div>
                             <div className="col-md-6">
                                 <div className="form-group">
+                                    <label>Item in my favorites</label>
                                     <table className="table table-striped table-bordered text-center">
-                                        <caption style={{display: "table-header-group", textAlign:"center"}}>Item in my favorites</caption>
                                         <thead className="thead-light">
                                             <tr>
                                                 <th>Image</th>

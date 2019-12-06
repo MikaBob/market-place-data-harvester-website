@@ -54,20 +54,28 @@ export class Autocomplete extends Component {
     };
     onKeyDown = e => {
         const {highlightSuggestion, filteredSuggestions} = this.state;
-        if (e.keyCode === 13) {
-            e.preventDefault();
+        // ESC
+        if (e.keyCode === 27) {
             this.setState({
                 highlightSuggestion: 0,
+                showSuggestions: false
+            });
+        }
+        // ENTER
+        else if (e.keyCode === 13) {
+            e.preventDefault();
+            this.setState({
                 showSuggestions: false,
                 inputValue: filteredSuggestions[highlightSuggestion].value,
                 selectedKey: filteredSuggestions[highlightSuggestion].key
             });
+        // UP
         } else if (e.keyCode === 38) {
             if (highlightSuggestion === 0) {
                 return;
             }
-
             this.setState({highlightSuggestion: highlightSuggestion - 1});
+        // DOWN
         } else if (e.keyCode === 40) {
             if (highlightSuggestion - 1 === filteredSuggestions.length) {
                 return;
@@ -94,7 +102,7 @@ export class Autocomplete extends Component {
         if (showSuggestions && inputValue) {
             if (filteredSuggestions.length) {
                 suggestionsListComponent = (
-                    <div className="suggestions">
+                    <div className="suggestions rounded-bottom">
                         {filteredSuggestions.map((suggestion, index) => {
                             let className;
                             if (index === highlightSuggestion) {
@@ -113,17 +121,22 @@ export class Autocomplete extends Component {
 
         return (
             <React.Fragment>
-                <input
-                    id={this.props.id}
-                    className="form-control mr-1"
-                    type="text"
-                    placeholder={this.props.placeholder}
-                    onChange={onChange}
-                    onKeyDown={onKeyDown}
-                    value={inputValue}
-                    data-selected-key={selectedKey}
-                />
-                {suggestionsListComponent}
+                <div className="autocomplete-container w-100">
+                    <input
+                        id={this.props.id}
+                        className="form-control w-100"
+                        type="text"
+                        placeholder={this.props.placeholder}
+                        onChange={onChange}
+                        onKeyDown={onKeyDown}
+                        onBlur={() => {this.setState({highlightSuggestion: 0, showSuggestions: false});}}
+                        value={inputValue}
+                        data-selected-key={selectedKey}
+                    />
+                    <div className="autocomplete-suggestions">
+                        {suggestionsListComponent}
+                    </div>
+                </div>
             </React.Fragment>
         );
     }
