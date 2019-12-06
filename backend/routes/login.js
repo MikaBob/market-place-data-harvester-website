@@ -25,28 +25,28 @@ router.post('/', (req, res) => {
 
             // Validate password
             bcrypt.compare(password, user.password)
-                .then(isMatch => {
-                    if (!isMatch)
-                        return res.status(400).json({msg: 'Invalid credentials'});
+            .then(isMatch => {
+                if (!isMatch)
+                    return res.status(400).json({msg: 'Invalid credentials'});
 
-                    jwt.sign(
-                            {id: user.id},
-                            process.env.JWT_SECRET,
-                            {expiresIn: 3600},
-                            (err, token) => {
-                        if (err)
-                            throw err;
-                        res.json({
-                            token,
-                            user: {
-                                id: user.id,
-                                login: user.login
-                            }
-                        });
-                    }
-                    )
+                jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: 3600},(err, token) => {
+                    if (err)
+                        throw err;
+                    res.json({
+                        token,
+                        user: {
+                            id: user.id,
+                            login: user.login
+                        }
+                    });
                 })
+            })
         })
+});
+
+router.get('/isTokenValid', auth, (req, res) => {
+    console.log("\nGET /login/isTokenValid \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
+    res.json({err: 'true'});
 });
 
 module.exports = router;

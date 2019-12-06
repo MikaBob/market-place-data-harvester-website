@@ -1,3 +1,4 @@
+const auth      = require('../authentification');
 const router    = require('express').Router();
 const http      = require('https');
 const request   = require('request');
@@ -7,70 +8,37 @@ let Item    = require('../models/item.model');
 let Price   = require('../models/price.model');
 
 
-/* 18/09/19	Pour le moment on oublie la partie authentification de l'utilisateur */
-router.post('/:itemGID', (req, res) => {
+router.post('/:itemGID', auth, (req, res) => {
     console.log("\nPOST /prices \nparams:", req.params, "\nquery:", req.query, "\nbody:", req.body);
 
     const itemGID = req.params.itemGID;
-    const { price_1, price_10, price_100, price_avg } = req.body;
+    const { price_1, price_10, price_100 } = req.body;
+	
+    if(isNaN(parseInt(itemGID)) || (typeof price_1 === 'undefined' && typeof price_10 === 'undefined' && typeof price_100 === 'undefined')){
+        return res.status(400).json({ msg: 'Could not add prices: Invalid value(s)' });
+    }
 
-    console.log('price_1:   ' + price_1);
-    console.log('price_10:  ' + price_10);
-    console.log('price_100: ' + price_100);
-    console.log('price_avg: ' + price_avg);
-
-    /*
-     if(undef(username) || undef(authToken)){
-     sendError(res, 400, "No username or auth token supplied");
-     return;
-     }
-     */
-    // Authentify user
-    /*dbFindOne({
-     model: User,
-     filter: JSON.stringify({login: username}),
-     success: function(user){
-     // Check if auth token is valid
-     if(def(user.session) &&user.session.expires > new Date().getTime()){
-     // Check if tokens match
-     if(makeAuthToken(user.session.salt, user.password) == authToken){*/
     var item = {itemGID: parseInt(itemGID)};
-    //item.userId =  user._id;
+    item.userId =  req.user.id;
     item.timestamp = new Date().getTime();
     item.price_1 = parseInt(price_1);
     item.price_10 = parseInt(price_10);
     item.price_100 = parseInt(price_100);
-    item.price_avg = parseInt(price_avg);
+    
+    // Create item if it doesn't exist yet
     Price.create(item, function () {
-        //créer l'item schema
         res.write("OK_" + item.itemGID);
         res.end();
-        
+
+        // Get more detail of the item from the encyclopédia
         Item.findOne({itemGID: req.params.itemGID})
-            .then((itemDetails) => {
-                if (itemDetails.length == 0)
-                {
-                    //Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie
-                    getItemDetailOnEncyclopedia(item.itemGID);
-                }
-            })
-            .catch((err) => {
-                //Le détail de l'item n'existe pas dans la bdd, allons le chercher dans l'encyclopédie
-                getItemDetailOnEncyclopedia(item.itemGID);
-            });
+        .then((itemDetails) => {
+            if (itemDetails.length === 0)
+                getItemDetailOnEncyclopedia(item.itemGID);   
+        }).catch((err) => {
+            getItemDetailOnEncyclopedia(item.itemGID);
+        });
     });
-    /*
-     } else {
-     sendError(res, 400, "Invalid session token");
-     }
-     } else {
-     sendError(res, 400, "Session expired");
-     }
-     },
-     notFound: function(error){
-     sendError(res, 400, "Inknown username");
-     }
-     });*/
 });
 
 var getItemDetailOnEncyclopedia = function (GID) {
@@ -132,7 +100,7 @@ var getItemDetailOnEncyclopedia = function (GID) {
              }
              */
 
-            if (result1 == null || result2 == null || result3 == null) {
+            if (result1 === null || result2 === null || result3 === null) {
                 console.log("Could not retrieve enougth info from encyclopedia - GID: " + GID);
                 return;
             }
